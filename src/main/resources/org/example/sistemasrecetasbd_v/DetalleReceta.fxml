@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane prefHeight="408.0" prefWidth="399.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.sistemarecetas.Controller.DetalleController">
+   <children>
+      <ImageView fitHeight="33.0" fitWidth="71.0" layoutX="164.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../../../Imagenes/LogoHospital.png" />
+         </image>
+      </ImageView>
+      <Label layoutX="152.0" layoutY="53.0" text="Detalle de receta">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <Separator layoutX="8.0" layoutY="72.0" prefHeight="4.0" prefWidth="384.0" />
+      <Label layoutX="14.0" layoutY="86.0" text="Codigo:" />
+      <TextField id="txtCodigoDetalle" fx:id="txtCodigoDetalle" editable="false" layoutX="14.0" layoutY="103.0" />
+      <Separator layoutX="197.0" layoutY="74.0" orientation="VERTICAL" prefHeight="283.0" prefWidth="6.0" />
+      <Label layoutX="15.0" layoutY="248.0" text="Estado:" />
+      <TextField id="txtEstadoDetalle" fx:id="txtEstadoDetalle" editable="false" layoutX="15.0" layoutY="265.0" />
+      <TextField id="txtCantidadDetalle" fx:id="txtCantidadDetalle" editable="false" layoutX="15.0" layoutY="320.0" />
+      <Label layoutX="15.0" layoutY="303.0" text="Cantidad:" />
+      <Button id="btnVolverDetalle" fx:id="btnVolverDetalle" layoutX="296.0" layoutY="369.0" mnemonicParsing="false" onAction="#volverAInicio" prefHeight="25.0" prefWidth="87.0" text="Volver" />
+      <Label layoutX="14.0" layoutY="141.0" text="Medicamento" />
+      <TextField id="txtMedicamentoDetalle" fx:id="txtMedicamentoDetalle" editable="false" layoutX="14.0" layoutY="158.0" />
+      <TextField id="txtPacienteDetalle" fx:id="txtPacienteDetalle" editable="false" layoutX="14.0" layoutY="213.0" />
+      <Label layoutX="14.0" layoutY="196.0" text="Paciente:" />
+      <Label layoutX="222.0" layoutY="86.0" text="Fecha de confeccion:" />
+      <Label layoutX="222.0" layoutY="141.0" text="Fecha de entrega:" />
+      <DatePicker id="dtpFechaCDetalle" fx:id="dtpFechaCDetalle" layoutX="210.0" layoutY="103.0" />
+      <DatePicker id="dtpFechaEDetalle" fx:id="dtpFechaEDetalle" layoutX="209.0" layoutY="158.0" />
+      <Label layoutX="214.0" layoutY="196.0" text="Detalle de receta:" />
+      <TextArea id="txtaDetalle" fx:id="txtaDetalle" editable="false" layoutX="210.0" layoutY="213.0" prefHeight="129.0" prefWidth="174.0" />
+      <Separator layoutX="11.0" layoutY="355.0" prefHeight="4.0" prefWidth="384.0" />
+   </children>
+</AnchorPane>

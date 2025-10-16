@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="375.0" prefWidth="512.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.sistemarecetas.Controller.LoginController">
+   <children>
+      <GridPane id="grdLogin" fx:id="grdLogin" layoutX="72.0" layoutY="162.0" prefHeight="67.0" prefWidth="356.0">
+        <columnConstraints>
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="150.0" minWidth="10.0" prefWidth="107.0" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="229.0" minWidth="10.0" prefWidth="213.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <Label id="lblIDLogin" fx:id="lblIDLogin" text="ID:" />
+            <Label id="lblContrasenaLogin" fx:id="lblContrasenaLogin" text="Contraseña:" GridPane.rowIndex="1" />
+            <TextField id="txtIDLogin" fx:id="txtIDLogin" GridPane.columnIndex="1">
+               <cursor>
+                  <Cursor fx:constant="TEXT" />
+               </cursor></TextField>
+            <PasswordField id="pwdContrasenaLogin" fx:id="pwdContrasenaLogin" GridPane.columnIndex="1" GridPane.rowIndex="1">
+               <cursor>
+                  <Cursor fx:constant="TEXT" />
+               </cursor></PasswordField>
+         </children>
+      </GridPane>
+      <Label layoutX="98.0" layoutY="123.0" text="Digite su ID y contraseña para iniciar sesión en el sistema." />
+      <Button id="btnIngresarLogin" fx:id="btnIngresarLogin" layoutX="190.0" layoutY="298.0" mnemonicParsing="false" onAction="#funcionIniciarSesion" prefHeight="25.0" prefWidth="130.0" text="Ingresar" />
+       <ProgressIndicator fx:id="progress" layoutX="229.0" layoutY="247.0" prefHeight="51.0" prefWidth="63.0" visible="false" />
+       <Button id="btnICambiarContrasenaLogin" fx:id="btnICambiarContrasenaLogin" layoutX="298.0" layoutY="241.0" mnemonicParsing="false" onAction="#cambioContrasena" prefHeight="18.0" prefWidth="130.0" text="Cambiar Contraseña" />
+      <ImageView id="pngLogoHospital" fx:id="pngLogoHospital" fitHeight="150.0" fitWidth="200.0" layoutX="149.0" layoutY="26.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../../../Imagenes/LogoHospital.png" />
+         </image></ImageView>
+   </children>
+</Pane>

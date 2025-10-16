@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.PieChart?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="557.0" prefWidth="643.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.sistemarecetas.Controller.InicioController">
+   <children>
+      <TabPane id="tabPane" fx:id="tabPane" layoutY="73.0" prefHeight="486.0" prefWidth="643.0" tabClosingPolicy="UNAVAILABLE">
+        <tabs>
+          <Tab id="tabInicio" fx:id="tabInicio" text="     Inicio      ">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="272.0" prefWidth="623.0">
+                     <children>
+                        <ImageView fitHeight="463.0" fitWidth="649.0" layoutX="-1.0" layoutY="-1.0" pickOnBounds="true">
+                           <image>
+                              <Image url="@../../../Imagenes/Hospital.jpg" />
+                           </image>
+                        </ImageView>
+                        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#b6c9da" height="48.0" layoutX="-14.0" layoutY="14.0" opacity="0.77" stroke="BLACK" strokeType="INSIDE" width="657.0" />
+                        <Label layoutX="84.0" layoutY="24.0" prefHeight="27.0" prefWidth="511.0" text="Bienvenido al sistema de prescripción y despacho de recetas del hospital">
+                           <font>
+                              <Font name="Gill Sans MT" size="15.0" />
+                           </font>
+                        </Label>
+                     </children></AnchorPane>
+            </content>
+          </Tab>
+          <Tab id="tabMedicos" fx:id="tabMedicos" text="    Médicos     ">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="335.0" prefWidth="616.0">
+                     <children>
+                        <TableView id="tblListaMedicos" fx:id="tblListaMedicos" layoutX="14.0" layoutY="43.0" prefHeight="394.0" prefWidth="501.0">
+                          <columns>
+                            <TableColumn id="colIDMedicos" fx:id="colIDMedicos" prefWidth="51.199978828430176" text="#" />
+                            <TableColumn id="colNombreMedicos" fx:id="colIdentificacionMedicos" prefWidth="132.0" text="Identificacion" />
+                              <TableColumn id="colEspecialidadMedicos" fx:id="colNombreMedicos" prefWidth="179.0" text="Nombre " />
+                              <TableColumn fx:id="colEspecialidadMedicos" prefWidth="137.0" text="Especialidad" />
+                          </columns>
+                        </TableView>
+                        <TextField id="txtBuscarMedicos" fx:id="txtBuscarMedicos" layoutX="14.0" layoutY="13.0" prefHeight="25.0" prefWidth="319.0">
+                           <cursor>
+                              <Cursor fx:constant="TEXT" />
+                           </cursor></TextField>
+                        <Button id="btnBuscarMedicos" fx:id="btnBuscarMedicos" layoutX="343.0" layoutY="13.0" mnemonicParsing="false" onAction="#buscarMedico" prefHeight="25.0" prefWidth="107.0" text="Buscar" />
+                        <Button id="btnAgregarMedicos" fx:id="btnAgregarMedicos" layoutX="527.0" layoutY="120.0" mnemonicParsing="false" onAction="#agregarMedico" prefHeight="25.0" prefWidth="105.0" text="Agregar" />
+                        <Button id="btnModificarMedicos" fx:id="btnModificarMedicos" layoutX="527.0" layoutY="180.0" mnemonicParsing="false" onAction="#modificarMedico" prefHeight="25.0" prefWidth="105.0" text="Modificar" />
+                        <Button id="btnEliminarMedicos" fx:id="btnEliminarMedicos" layoutX="527.0" layoutY="240.0" mnemonicParsing="false" onAction="#eliminarMedico" prefHeight="25.0" prefWidth="107.0" text="Eliminar" />
+                     </children></AnchorPane>
+            </content>
+          </Tab>
+            <Tab id="tabFarmaceutas" fx:id="tabFarmaceutas" text="  Farmaceutas ">
+                <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="335.0" prefWidth="616.0">
+                        <children>
+                            <TableView id="tblListaFarmaceutas" fx:id="tblListaFarmaceutas" layoutX="14.0" layoutY="43.0" prefHeight="394.0" prefWidth="501.0">
+                                <columns>
+                                    <TableColumn id="colIDFarmaceutas" fx:id="colIDFarmaceutas" prefWidth="69.0" text="#" />
+                                    <TableColumn id="colIdentificacionFarmaceutas" fx:id="colIdentificacionFarmaceutas" prefWidth="191.0" text="Identificacion" />
+                              <TableColumn id="colNombreFarmaceutas" fx:id="colNombreFarmaceutas" prefWidth="240.0" text="Nombre" />
+                                </columns>
+                            </TableView>
+                            <TextField id="txtBuscarFarmaceutas" fx:id="txtBuscarFarmaceutas" layoutX="14.0" layoutY="13.0" prefHeight="25.0" prefWidth="319.0">
+                           <cursor>
+                              <Cursor fx:constant="TEXT" />
+                           </cursor></TextField>
+                            <Button id="btnBuscarFarmaceutas" fx:id="btnBuscarFarmaceutas" layoutX="343.0" layoutY="13.0" mnemonicParsing="false" onAction="#buscarFarmaceuta" prefHeight="25.0" prefWidth="107.0" text="Buscar" />
+                            <Button id="btnAgregarFarmaceutas" fx:id="btnAgregarFarmaceutas" layoutX="527.0" layoutY="120.0" mnemonicParsing="false" onAction="#agregarFarmaceuta" prefHeight="25.0" prefWidth="105.0" text="Agregar" />
+                            <Button id="btnModificarFarmaceutas" fx:id="btnModificarFarmaceutas" layoutX="527.0" layoutY="180.0" mnemonicParsing="false" onAction="#modificarFarmaceuta" prefHeight="25.0" prefWidth="105.0" text="Modificar" />
+                            <Button id="btnEliminarFarmaceutas" fx:id="btnEliminarFarmaceutas" layoutX="527.0" layoutY="240.0" mnemonicParsing="false" onAction="#eliminarFarmaceuta" prefHeight="25.0" prefWidth="107.0" text="Eliminar" />
+                        </children></AnchorPane>
+                </content>
+            </Tab>
+            <Tab id="tabPacientes" fx:id="tabPacientes" text="   Pacientes   ">
+                <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="381.0" prefWidth="640.0">
+                        <children>
+                            <TableView id="tblListaPacientes" fx:id="tblListaPacientes" layoutX="14.0" layoutY="43.0" prefHeight="394.0" prefWidth="501.0">
+                                <columns>
+                                    <TableColumn id="colIDPacientes" fx:id="colIDPacientes" prefWidth="51.0" text="#" />
+                                    <TableColumn id="colIdentificacionPaciente" fx:id="colIdentificacionPaciente" prefWidth="117.0" text="Identificacion" />
+                                    <TableColumn id="colNombrePacientes" fx:id="colNombrePacientes" prefWidth="109.0" text="Nombre" />
+                              <TableColumn id="colTelefonoPaciente" fx:id="colTelefonoPaciente" prefWidth="95.0" text="Teléfono" />
+                              <TableColumn id="colFechaNacimientoPacientes" fx:id="colFechaNacimientoPacientes" prefWidth="128.0" text="Fch. de Nacimiento" />
+                                </columns>
+                            </TableView>
+                            <TextField id="txtBuscarPacientes" fx:id="txtBuscarPacientes" layoutX="14.0" layoutY="13.0" prefHeight="25.0" prefWidth="319.0">
+                           <cursor>
+                              <Cursor fx:constant="TEXT" />
+                           </cursor></TextField>
+                            <Button id="btnBuscarPacientes" fx:id="btnBuscarPacientes" layoutX="343.0" layoutY="13.0" mnemonicParsing="false" onAction="#buscarPaciente" prefHeight="25.0" prefWidth="107.0" text="Buscar" />
+                            <Button id="btnAgregarPacientes" fx:id="btnAgregarPacientes" layoutX="527.0" layoutY="120.0" mnemonicParsing="false" onAction="#agregarPaciente" prefHeight="25.0" prefWidth="105.0" text="Agregar" />
+                            <Button id="btnModificarPacientes" fx:id="btnModificarPacientes" layoutX="527.0" layoutY="180.0" mnemonicParsing="false" onAction="#modificarPaciente" prefHeight="25.0" prefWidth="105.0" text="Modificar" />
+                            <Button id="btnEliminarPacientes" fx:id="btnEliminarPacientes" layoutX="527.0" layoutY="240.0" mnemonicParsing="false" onAction="#eliminarPaciente" prefHeight="25.0" prefWidth="107.0" text="Eliminar" />
+                        </children></AnchorPane>
+                </content>
+            </Tab>
+            <Tab id="tabMedicamentos" fx:id="tabMedicamentos" text=" Medicamentos ">
+                <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="335.0" prefWidth="616.0">
+                        <children>
+                            <TableView id="tblListaMedicamentos" fx:id="tblListaMedicamentos" layoutX="14.0" layoutY="43.0" prefHeight="394.0" prefWidth="501.0">
+                                <columns>
+                                    <TableColumn id="colCodigoMedicamentos" fx:id="colCodigoMedicamentos" prefWidth="82.0" text="#" />
+                                    <TableColumn id="colNombreMedicamentos" fx:id="colNombreMedicamentos" prefWidth="229.0" text="Nombre " />
+                                    <TableColumn id="colPresentacionMedicamentos" fx:id="colPresentacionMedicamentos" prefWidth="189.0" text="Presentacion" />
+                                </columns>
+                            </TableView>
+                            <TextField id="txtBuscarMedicamentos" fx:id="txtBuscarMedicamentos" layoutX="14.0" layoutY="13.0" prefHeight="25.0" prefWidth="319.0">
+                           <cursor>
+                              <Cursor fx:constant="TEXT" />
+                           </cursor></TextField>
+                            <Button id="btnBuscarMedicamentos" fx:id="btnBuscarMedicamentos" layoutX="343.0" layoutY="13.0" mnemonicParsing="false" onAction="#buscarMedicamento" prefHeight="25.0" prefWidth="107.0" text="Buscar" />
+                        <Button id="btnAgregarMedicamentos" fx:id="btnAgregarMedicamentos" layoutX="527.0" layoutY="240.0" mnemonicParsing="false" onAction="#agregarMedicamento" prefHeight="25.0" prefWidth="105.0" text="Agregar" />
+                        <Button id="btnModificarMedicamentos" fx:id="btnModificarMedicamentos" layoutX="527.0" layoutY="300.0" mnemonicParsing="false" onAction="#modificarMedicamento" prefHeight="25.0" prefWidth="105.0" text="Modificar" />
+                        <Button id="btnEliminarMedicamentos" fx:id="btnEliminarMedicamentos" layoutX="527.0" layoutY="360.0" mnemonicParsing="false" onAction="#eliminarMedicamento" prefHeight="25.0" prefWidth="105.0" text="Eliminar" />
+                        <Button id="btnPrescripcion" fx:id="btnPrescripcion" layoutX="527.0" layoutY="87.0" mnemonicParsing="false" onAction="#abrirPrescripcion" prefHeight="25.0" prefWidth="105.0" text="Prescripción" />
+                        <Button id="btnDespacho" fx:id="btnDespacho" layoutX="527.0" layoutY="147.0" mnemonicParsing="false" onAction="#abrirDespacho" prefHeight="25.0" prefWidth="105.0" text="Despacho" />
+                        </children></AnchorPane>
+                </content>
+            </Tab>
+            <Tab id="tabDashboard" fx:id="tabDashboard" text="  Dashboard   ">
+              <content>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                     <children>
+                        <PieChart id="graficoRecetas" fx:id="graficoRecetas" layoutX="206.0" layoutY="243.0" legendVisible="false" prefHeight="203.0" prefWidth="424.0" />
+                        <Label layoutX="14.0" layoutY="239.0" text="Recetas">
+                           <font>
+                              <Font name="Lucida Fax Italic" size="14.0" />
+                           </font>
+                        </Label>
+                        <Label layoutX="14.0" layoutY="264.0" text="Cantidad de recetas:" />
+                        <Label layoutX="12.0" layoutY="16.0" text="Medicamentos">
+                           <font>
+                              <Font name="Lucida Fax Italic" size="14.0" />
+                           </font>
+                        </Label>
+                        <TableView id="tblMedicamentosDashboard" fx:id="tblMedicamentosDashboard" layoutX="11.0" layoutY="93.0" prefHeight="112.0" prefWidth="236.0">
+                          <columns>
+                            <TableColumn id="colCodigoMedicamentoDashboard" fx:id="colCodigoMedicamentoDashboard" prefWidth="65.0" resizable="false" text="Código" />
+                            <TableColumn id="colMedicamentoDashboard" fx:id="colMedicamentoDashboard" prefWidth="170.0" resizable="false" text="Medicamento" />
+                          </columns>
+                        </TableView>
+                        <Label layoutX="12.0" layoutY="41.0" text="Seleccione los medicamentos:" />
+                        <Label id="lblCantidadRecetas" fx:id="lblCantidadRecetas" layoutX="131.0" layoutY="264.0" text="Label">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font></Label>
+                        <Label layoutX="14.0" layoutY="285.0" text="Recetas en confección:" />
+                        <Label layoutX="14.0" layoutY="308.0" text="Recetas en proceso:" />
+                        <Label layoutX="14.0" layoutY="356.0" text="Recetas entregadas:" />
+                        <Label layoutX="14.0" layoutY="332.0" text="Recetas listas:" />
+                        <Label id="lblRecetasConfeccion" fx:id="lblRecetasConfeccion" layoutX="139.0" layoutY="285.0" text="Label">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <Label id="lblRecetasProceso" fx:id="lblRecetasProceso" layoutX="124.0" layoutY="308.0" text="Label">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <Label id="lblRecetasListas" fx:id="lblRecetasListas" layoutX="91.0" layoutY="333.0" text="Label">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <Label id="lblRecetasEntregadas" fx:id="lblRecetasEntregadas" layoutX="123.0" layoutY="357.0" text="Label">
+                           <font>
+                              <Font name="System Bold" size="12.0" />
+                           </font>
+                        </Label>
+                        <TextField id="txtBuscarDashboard" fx:id="txtBuscarDashboard" layoutX="12.0" layoutY="61.0" prefHeight="25.0" prefWidth="157.0" />
+                        <Button id="bnBuscarDashboard" fx:id="btnBuscarDashboard" layoutX="176.0" layoutY="61.0" mnemonicParsing="false" onAction="#buscarDashboard" prefHeight="26.0" prefWidth="71.0" text="Buscar" />
+                        <Separator layoutX="9.0" layoutY="225.0" prefHeight="7.0" prefWidth="625.0" />
+                        <BarChart id="graficoMedicamentos" fx:id="graficoMedicamentos" layoutX="254.0" prefHeight="225.0" prefWidth="389.0">
+                          <xAxis>
+                            <CategoryAxis side="BOTTOM" />
+                          </xAxis>
+                          <yAxis>
+                            <NumberAxis side="LEFT" />
+                          </yAxis>
+                        </BarChart>
+                     </children></AnchorPane>
+              </content>
+            </Tab>
+            <Tab id="tabHistorial" fx:id="tabHistorial" text="   Historial    ">
+                <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="335.0" prefWidth="616.0">
+                        <children>
+                            <TableView id="tblListaHistorial" fx:id="tblListaHistorial" layoutX="14.0" layoutY="43.0" prefHeight="394.0" prefWidth="501.0">
+                                <columns>
+                                    <TableColumn id="colCodigoHistorial" fx:id="colCodigoHistorial" prefWidth="59.20001029968262" text="Codigo" />
+                                    <TableColumn id="colMedicamentoHistorial" fx:id="colMedicamentoHistorial" prefWidth="138.39997100830078" text="Medicamento " />
+                                    <TableColumn id="colPacienteHistorial" fx:id="colPacienteHistorial" prefWidth="138.0" text="Paciente" />
+                              <TableColumn id="colEstadoHistorial" fx:id="colEstadoHistorial" prefWidth="91.20001220703125" text="Estado" />
+                              <TableColumn id="colcantHistorial" fx:id="colcantHistorial" prefWidth="75.0" text="Cantidad" />
+                                </columns>
+                            </TableView>
+                            <TextField id="txtBuscarHistorial" fx:id="txtBuscarHistorial" layoutX="14.0" layoutY="13.0" prefHeight="25.0" prefWidth="319.0">
+                           <cursor>
+                              <Cursor fx:constant="TEXT" />
+                           </cursor></TextField>
+                            <Button id="btnBuscarHistorial" fx:id="btnBuscarHistorial" layoutX="343.0" layoutY="13.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="107.0" text="Buscar" />
+                            <Button id="btnDetallesHistorial" fx:id="btnDetallesHistorial" layoutX="527.0" layoutY="211.0" mnemonicParsing="false" onAction="#mostrarDetallesReceta" prefHeight="25.0" prefWidth="105.0" text="Mostrar Detalles" />
+
+                        </children></AnchorPane>
+                </content>
+            </Tab>
+        </tabs>
+      </TabPane>
+      <ImageView fitHeight="41.0" fitWidth="113.0" layoutX="253.0" layoutY="15.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../../../Imagenes/LogoHospital.png" />
+         </image>
+      </ImageView>
+      <Button id="btncerrarsesion" fx:id="btncerrarsesion" layoutX="525.0" layoutY="31.0" mnemonicParsing="false" onAction="#cerrarSesion" text="Cerrar Sesion " textFill="RED" />
+      <Label id="lblusuario" fx:id="lblusuario" layoutX="14.0" layoutY="35.0" text="Usuario:">
+         <font>
+            <Font name="System Bold" size="12.0" />
+         </font>
+      </Label>
+      <Label id="lblusuarioactual" fx:id="lblusuarioactual" layoutX="68.0" layoutY="35.0" text="Label" />
+   </children>
+</AnchorPane>
