@@ -1,47 +1,49 @@
-package org.example.sistemasrecetasbd_v.Persistencia.Datos;
+package org.example.sistemasrecetasbd_v.Data;
 
-import jakarta.xml.bind.*;
-import org.example.sistemasrecetasbd_v.Persistencia.Conector.RecetaConector;
-import org.example.sistemasrecetasbd_v.Persistencia.Entity.RecetaEntity;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
+import org.example.sistemasrecetasbd_v.Data.Conector.FarmaceutaConector;
+import org.example.sistemasrecetasbd_v.Data.Entity.FarmaceutaEntity;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public class RecetaDatos {
+public class FarmaceutaDatos {
     private final Path xmlPath;
     private final JAXBContext ctx;
-    private RecetaConector cache;
+    private FarmaceutaConector cache;
 
-    public RecetaDatos(String filePath) {
+    public FarmaceutaDatos(String filePath) {
         try {
             this.xmlPath = Path.of(Objects.requireNonNull(filePath));
-            this.ctx = JAXBContext.newInstance(RecetaConector.class, RecetaEntity.class);
+            this.ctx = JAXBContext.newInstance(FarmaceutaConector.class, FarmaceutaEntity.class);
         } catch (Exception e) {
             throw new RuntimeException("Error inicializando JAXBContext", e);
         }
     }
 
-    public synchronized RecetaConector load() {
+    public synchronized FarmaceutaConector load() {
         try {
             if (cache != null) return cache;
 
             if (!Files.exists(xmlPath)) {
-                cache = new RecetaConector();
+                cache = new FarmaceutaConector();
                 save(cache);
                 return cache;
             }
             Unmarshaller u = ctx.createUnmarshaller();
-            cache = (RecetaConector) u.unmarshal(xmlPath.toFile());
-            if (cache.getRecetas() == null) cache.setRecetas(new java.util.ArrayList<>());
+            cache = (FarmaceutaConector) u.unmarshal(xmlPath.toFile());
+            if (cache.getFarmaceutas() == null) cache.setFarmaceutas(new java.util.ArrayList<>());
             return cache;
         } catch (Exception e) {
             throw new RuntimeException("Error cargando XML: " + xmlPath, e);
         }
     }
 
-    public synchronized void save(RecetaConector data) {
+    public synchronized void save(FarmaceutaConector data) {
         try {
             Marshaller m = ctx.createMarshaller();
             m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);

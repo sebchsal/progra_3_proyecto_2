@@ -16,13 +16,13 @@ import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import org.example.sistemasrecetasbd_v.Logica.Logica.*;
+import org.example.sistemasrecetasbd_v.Logica.*;
 import org.example.sistemasrecetasbd_v.Model.Clases.*;
 import org.example.sistemasrecetasbd_v.Model.Listas.*;
-import org.example.sistemasrecetasbd_v.Persistencia.Conector.MedicamentoConector;
-import org.example.sistemasrecetasbd_v.Persistencia.Conector.MedicoConector;
-import org.example.sistemasrecetasbd_v.Persistencia.Conector.FarmaceutaConector;
-import org.example.sistemasrecetasbd_v.Persistencia.Conector.PacienteConector;
+import org.example.sistemasrecetasbd_v.Data.Conector.MedicamentoConector;
+import org.example.sistemasrecetasbd_v.Data.Conector.MedicoConector;
+import org.example.sistemasrecetasbd_v.Data.Conector.FarmaceutaConector;
+import org.example.sistemasrecetasbd_v.Data.Conector.PacienteConector;
 
 
 import java.io.File;

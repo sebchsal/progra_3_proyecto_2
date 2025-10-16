@@ -1,49 +1,49 @@
-package org.example.sistemasrecetasbd_v.Persistencia.Datos;
+package org.example.sistemasrecetasbd_v.Data;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
-import org.example.sistemasrecetasbd_v.Persistencia.Conector.MedicoConector;
-import org.example.sistemasrecetasbd_v.Persistencia.Entity.MedicoEntity;
+import org.example.sistemasrecetasbd_v.Data.Conector.MedicamentoConector;
+import org.example.sistemasrecetasbd_v.Data.Entity.MedicamentoEntity;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public class MedicoDatos {
+public class MedicamentoDatos {
     private final Path xmlPath;
     private final JAXBContext ctx;
-    private MedicoConector cache;
+    private MedicamentoConector cache;
 
-    public MedicoDatos(String filePath) {
+    public MedicamentoDatos(String filePath) {
         try {
             this.xmlPath = Path.of(Objects.requireNonNull(filePath));
-            this.ctx = JAXBContext.newInstance(MedicoConector.class, MedicoEntity.class);
+            this.ctx = JAXBContext.newInstance(MedicamentoConector.class, MedicamentoEntity.class);
         } catch (Exception e) {
             throw new RuntimeException("Error inicializando JAXBContext", e);
         }
     }
 
-    public synchronized MedicoConector load() {
+    public synchronized MedicamentoConector load() {
         try {
             if (cache != null) return cache;
 
             if (!Files.exists(xmlPath)) {
-                cache = new MedicoConector();
-                save(cache); // crea archivo vacío
+                cache = new MedicamentoConector();
+                save(cache);
                 return cache;
             }
             Unmarshaller u = ctx.createUnmarshaller();
-            cache = (MedicoConector) u.unmarshal(xmlPath.toFile());
-            if (cache.getMedicos() == null) cache.setMedicos(new java.util.ArrayList<>());
+            cache = (MedicamentoConector) u.unmarshal(xmlPath.toFile());
+            if (cache.getMedicamentos() == null) cache.setMedicamentos(new java.util.ArrayList<>());
             return cache;
         } catch (Exception e) {
             throw new RuntimeException("Error cargando XML: " + xmlPath, e);
         }
     }
 
-    public synchronized void save(MedicoConector data) {
+    public synchronized void save(MedicamentoConector data) {
         try {
             Marshaller m = ctx.createMarshaller();
             m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
@@ -53,12 +53,10 @@ public class MedicoDatos {
             File parent = out.getParentFile();
             if (parent != null) parent.mkdirs();
 
-            // Debug: mostrar a consola el XML que se va a guardar // Para pruebas
             java.io.StringWriter sw = new java.io.StringWriter();
             m.marshal(data, sw);
-            System.out.println("[DEBUG] XML contenido:\n" + sw);
+            System.out.println("[DEBUG] XML Medicamentos:\n" + sw);
 
-            // Escribir al archivo
             m.marshal(data, out);
 
             cache = data;
@@ -68,5 +66,4 @@ public class MedicoDatos {
     }
 
     public Path getXmlPath() { return xmlPath; }
-
 }

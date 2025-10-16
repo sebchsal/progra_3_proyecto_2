@@ -1,9 +1,9 @@
-package org.example.sistemasrecetasbd_v.Logica.Logica;
+package org.example.sistemasrecetasbd_v.Logica;
 
 import org.example.sistemasrecetasbd_v.Logica.Mapper.MedicamentoMapper;
-import org.example.sistemasrecetasbd_v.Persistencia.Conector.MedicamentoConector;
-import org.example.sistemasrecetasbd_v.Persistencia.Datos.MedicamentoDatos;
-import org.example.sistemasrecetasbd_v.Persistencia.Entity.MedicamentoEntity;
+import org.example.sistemasrecetasbd_v.Data.Conector.MedicamentoConector;
+import org.example.sistemasrecetasbd_v.Data.MedicamentoDatos;
+import org.example.sistemasrecetasbd_v.Data.Entity.MedicamentoEntity;
 import org.example.sistemasrecetasbd_v.Model.Clases.Medicamento;
 
 import java.util.*;

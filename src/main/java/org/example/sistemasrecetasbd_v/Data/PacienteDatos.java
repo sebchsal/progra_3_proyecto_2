@@ -1,10 +1,10 @@
-package org.example.sistemasrecetasbd_v.Persistencia.Datos;
+package org.example.sistemasrecetasbd_v.Data;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
-import org.example.sistemasrecetasbd_v.Persistencia.Conector.PacienteConector;
-import org.example.sistemasrecetasbd_v.Persistencia.Entity.PacienteEntity;
+import org.example.sistemasrecetasbd_v.Data.Conector.PacienteConector;
+import org.example.sistemasrecetasbd_v.Data.Entity.PacienteEntity;
 
 import java.io.File;
 import java.nio.file.Files;

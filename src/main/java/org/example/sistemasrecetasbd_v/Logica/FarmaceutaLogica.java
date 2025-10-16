@@ -1,9 +1,9 @@
-package org.example.sistemasrecetasbd_v.Logica.Logica;
+package org.example.sistemasrecetasbd_v.Logica;
 
 import org.example.sistemasrecetasbd_v.Logica.Mapper.FarmaceutaMapper;
-import org.example.sistemasrecetasbd_v.Persistencia.Conector.FarmaceutaConector;
-import org.example.sistemasrecetasbd_v.Persistencia.Datos.FarmaceutaDatos;
-import org.example.sistemasrecetasbd_v.Persistencia.Entity.FarmaceutaEntity;
+import org.example.sistemasrecetasbd_v.Data.Conector.FarmaceutaConector;
+import org.example.sistemasrecetasbd_v.Data.FarmaceutaDatos;
+import org.example.sistemasrecetasbd_v.Data.Entity.FarmaceutaEntity;
 import org.example.sistemasrecetasbd_v.Model.Clases.Farmaceuta;
 
 import java.util.*;

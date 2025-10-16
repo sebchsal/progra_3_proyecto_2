@@ -1,10 +1,10 @@
-package org.example.sistemasrecetasbd_v.Logica.Logica;
+package org.example.sistemasrecetasbd_v.Logica;
 
 import org.example.sistemasrecetasbd_v.Logica.Mapper.RecetaMapper;
 import org.example.sistemasrecetasbd_v.Model.Clases.Receta;
-import org.example.sistemasrecetasbd_v.Persistencia.Conector.RecetaConector;
-import org.example.sistemasrecetasbd_v.Persistencia.Datos.RecetaDatos;
-import org.example.sistemasrecetasbd_v.Persistencia.Entity.RecetaEntity;
+import org.example.sistemasrecetasbd_v.Data.Conector.RecetaConector;
+import org.example.sistemasrecetasbd_v.Data.RecetaDatos;
+import org.example.sistemasrecetasbd_v.Data.Entity.RecetaEntity;
 
 import java.util.*;
 import java.util.stream.Collectors;

@@ -9,7 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.example.sistemasrecetasbd_v.Logica.Logica.RecetaLogica;
+import org.example.sistemasrecetasbd_v.Logica.RecetaLogica;
 import org.example.sistemasrecetasbd_v.Model.Listas.HistoricoRecetas;
 import org.example.sistemasrecetasbd_v.Model.Clases.Receta;
 

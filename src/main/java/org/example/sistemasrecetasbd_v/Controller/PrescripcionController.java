@@ -10,7 +10,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 
-import org.example.sistemasrecetasbd_v.Logica.Logica.RecetaLogica;
+import org.example.sistemasrecetasbd_v.Logica.RecetaLogica;
 import org.example.sistemasrecetasbd_v.Model.Listas.HistoricoRecetas;
 import org.example.sistemasrecetasbd_v.Model.Clases.Medicamento;
 import org.example.sistemasrecetasbd_v.Model.Clases.Paciente;

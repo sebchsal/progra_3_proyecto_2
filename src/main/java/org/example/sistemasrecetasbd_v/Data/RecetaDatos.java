@@ -1,49 +1,47 @@
-package org.example.sistemasrecetasbd_v.Persistencia.Datos;
+package org.example.sistemasrecetasbd_v.Data;
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.Marshaller;
-import jakarta.xml.bind.Unmarshaller;
-import org.example.sistemasrecetasbd_v.Persistencia.Conector.MedicamentoConector;
-import org.example.sistemasrecetasbd_v.Persistencia.Entity.MedicamentoEntity;
+import jakarta.xml.bind.*;
+import org.example.sistemasrecetasbd_v.Data.Conector.RecetaConector;
+import org.example.sistemasrecetasbd_v.Data.Entity.RecetaEntity;
 
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public class MedicamentoDatos {
+public class RecetaDatos {
     private final Path xmlPath;
     private final JAXBContext ctx;
-    private MedicamentoConector cache;
+    private RecetaConector cache;
 
-    public MedicamentoDatos(String filePath) {
+    public RecetaDatos(String filePath) {
         try {
             this.xmlPath = Path.of(Objects.requireNonNull(filePath));
-            this.ctx = JAXBContext.newInstance(MedicamentoConector.class, MedicamentoEntity.class);
+            this.ctx = JAXBContext.newInstance(RecetaConector.class, RecetaEntity.class);
         } catch (Exception e) {
             throw new RuntimeException("Error inicializando JAXBContext", e);
         }
     }
 
-    public synchronized MedicamentoConector load() {
+    public synchronized RecetaConector load() {
         try {
             if (cache != null) return cache;
 
             if (!Files.exists(xmlPath)) {
-                cache = new MedicamentoConector();
+                cache = new RecetaConector();
                 save(cache);
                 return cache;
             }
             Unmarshaller u = ctx.createUnmarshaller();
-            cache = (MedicamentoConector) u.unmarshal(xmlPath.toFile());
-            if (cache.getMedicamentos() == null) cache.setMedicamentos(new java.util.ArrayList<>());
+            cache = (RecetaConector) u.unmarshal(xmlPath.toFile());
+            if (cache.getRecetas() == null) cache.setRecetas(new java.util.ArrayList<>());
             return cache;
         } catch (Exception e) {
             throw new RuntimeException("Error cargando XML: " + xmlPath, e);
         }
     }
 
-    public synchronized void save(MedicamentoConector data) {
+    public synchronized void save(RecetaConector data) {
         try {
             Marshaller m = ctx.createMarshaller();
             m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
@@ -53,12 +51,7 @@ public class MedicamentoDatos {
             File parent = out.getParentFile();
             if (parent != null) parent.mkdirs();
 
-            java.io.StringWriter sw = new java.io.StringWriter();
-            m.marshal(data, sw);
-            System.out.println("[DEBUG] XML Medicamentos:\n" + sw);
-
             m.marshal(data, out);
-
             cache = data;
         } catch (Exception e) {
             throw new RuntimeException("Error guardando XML: " + xmlPath, e);
