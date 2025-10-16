@@ -12,7 +12,7 @@ public final class DB {
     private static HikariDataSource ds;
 
     static {
-        try (InputStream in = DB.class.getClassLoader().getResourceAsStream("db_copy.properties")) {
+        try (InputStream in = DB.class.getClassLoader().getResourceAsStream("db_example.properties")) {
             Properties p = new Properties();
             p.load(in);
 
