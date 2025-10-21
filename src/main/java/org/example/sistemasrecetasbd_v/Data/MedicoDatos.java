@@ -1,72 +1,95 @@
 package org.example.sistemasrecetasbd_v.Data;
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.Marshaller;
-import jakarta.xml.bind.Unmarshaller;
-import org.example.sistemasrecetasbd_v.Data.Conector.MedicoConector;
-import org.example.sistemasrecetasbd_v.Data.Entity.MedicoEntity;
+import org.example.sistemasrecetasbd_v.Model.Clases.Medico;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Objects;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MedicoDatos {
-    private final Path xmlPath;
-    private final JAXBContext ctx;
-    private MedicoConector cache;
 
-    public MedicoDatos(String filePath) {
-        try {
-            this.xmlPath = Path.of(Objects.requireNonNull(filePath));
-            this.ctx = JAXBContext.newInstance(MedicoConector.class, MedicoEntity.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Error inicializando JAXBContext", e);
-        }
-    }
+    public Medico insert(Medico medico) throws SQLException {
+        String sql = "INSERT INTO medico (identificacion, nombre, clave, especialidad) VALUES (?, ?, ?, ?)";
+        try (Connection cn = DB.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-    public synchronized MedicoConector load() {
-        try {
-            if (cache != null) return cache;
+            ps.setString(1, medico.getIdentificacion());
+            ps.setString(2, medico.getNombre());
+            ps.setString(3, medico.getClave());
+            ps.setString(4, medico.getEspecialidad());
+            ps.executeUpdate();
 
-            if (!Files.exists(xmlPath)) {
-                cache = new MedicoConector();
-                save(cache); // crea archivo vacío
-                return cache;
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    int id = rs.getInt(1);
+                    return findById(id);
+                }
             }
-            Unmarshaller u = ctx.createUnmarshaller();
-            cache = (MedicoConector) u.unmarshal(xmlPath.toFile());
-            if (cache.getMedicos() == null) cache.setMedicos(new java.util.ArrayList<>());
-            return cache;
-        } catch (Exception e) {
-            throw new RuntimeException("Error cargando XML: " + xmlPath, e);
         }
+        return null;
     }
 
-    public synchronized void save(MedicoConector data) {
-        try {
-            Marshaller m = ctx.createMarshaller();
-            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            m.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+    public Medico findById(int id) throws SQLException {
+        String sql = "SELECT * FROM medico WHERE id = ?";
+        Medico medico = null;
+        try (Connection cn = DB.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
 
-            File out = xmlPath.toFile();
-            File parent = out.getParentFile();
-            if (parent != null) parent.mkdirs();
-
-            // Debug: mostrar a consola el XML que se va a guardar // Para pruebas
-            java.io.StringWriter sw = new java.io.StringWriter();
-            m.marshal(data, sw);
-            System.out.println("[DEBUG] XML contenido:\n" + sw);
-
-            // Escribir al archivo
-            m.marshal(data, out);
-
-            cache = data;
-        } catch (Exception e) {
-            throw new RuntimeException("Error guardando XML: " + xmlPath, e);
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    medico = new Medico(
+                            rs.getString("identificacion"),
+                            rs.getString("nombre"),
+                            rs.getString("clave"),
+                            rs.getString("especialidad")
+                    );
+                }
+            }
         }
+        return medico;
     }
 
-    public Path getXmlPath() { return xmlPath; }
+    public List<Medico> findAll() throws SQLException {
+        List<Medico> lista = new ArrayList<>();
+        String sql = "SELECT * FROM medico ORDER BY id";
 
+        try (Connection cn = DB.getConnection();
+             Statement st = cn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Medico medico = new Medico(
+                        rs.getString("identificacion"),
+                        rs.getString("nombre"),
+                        rs.getString("clave"),
+                        rs.getString("especialidad")
+                );
+                lista.add(medico);
+            }
+        }
+        return lista;
+    }
+
+    public Medico update(Medico medico) throws SQLException {
+        String sql = "UPDATE medico SET nombre=?, clave=?, especialidad=? WHERE identificacion=?";
+        try (Connection cn = DB.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+
+            ps.setString(1, medico.getNombre());
+            ps.setString(2, medico.getIdentificacion());
+            ps.setString(3, medico.getClave());
+            ps.setString(4, medico.getEspecialidad());
+            ps.executeUpdate();
+        }
+        return medico;
+    }
+
+    public int delete(int id) throws SQLException {
+        String sql = "DELETE FROM medico WHERE id = " + id;
+        try (Connection cn = DB.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            return ps.executeUpdate();
+        }
+    }
 }

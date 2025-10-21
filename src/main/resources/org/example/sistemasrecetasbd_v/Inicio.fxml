@@ -19,7 +19,7 @@
 <?import javafx.scene.shape.Rectangle?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="557.0" prefWidth="643.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.sistemarecetas.Controller.InicioController">
+<AnchorPane prefHeight="557.0" prefWidth="643.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.sistemasrecetasbd_v.Controller.InicioController">
    <children>
       <TabPane id="tabPane" fx:id="tabPane" layoutY="73.0" prefHeight="486.0" prefWidth="643.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>

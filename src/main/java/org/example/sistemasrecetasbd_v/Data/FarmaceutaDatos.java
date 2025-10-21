@@ -1,64 +1,91 @@
 package org.example.sistemasrecetasbd_v.Data;
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.Marshaller;
-import jakarta.xml.bind.Unmarshaller;
-import org.example.sistemasrecetasbd_v.Data.Conector.FarmaceutaConector;
-import org.example.sistemasrecetasbd_v.Data.Entity.FarmaceutaEntity;
+import org.example.sistemasrecetasbd_v.Model.Clases.Farmaceuta;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Objects;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FarmaceutaDatos {
-    private final Path xmlPath;
-    private final JAXBContext ctx;
-    private FarmaceutaConector cache;
 
-    public FarmaceutaDatos(String filePath) {
-        try {
-            this.xmlPath = Path.of(Objects.requireNonNull(filePath));
-            this.ctx = JAXBContext.newInstance(FarmaceutaConector.class, FarmaceutaEntity.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Error inicializando JAXBContext", e);
-        }
-    }
+    public Farmaceuta insert(Farmaceuta farmaceuta) throws SQLException {
+        String sql = "INSERT INTO farmaceuta (identificacion, nombre, clave) VALUES (?, ?, ?)";
+        try (Connection cn = DB.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-    public synchronized FarmaceutaConector load() {
-        try {
-            if (cache != null) return cache;
+            ps.setString(1, farmaceuta.getIdentificacion());
+            ps.setString(2, farmaceuta.getNombre());
+            ps.setString(3, farmaceuta.getClave());
+            ps.executeUpdate();
 
-            if (!Files.exists(xmlPath)) {
-                cache = new FarmaceutaConector();
-                save(cache);
-                return cache;
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    int id = rs.getInt(1);
+                    return findById(id);
+                }
             }
-            Unmarshaller u = ctx.createUnmarshaller();
-            cache = (FarmaceutaConector) u.unmarshal(xmlPath.toFile());
-            if (cache.getFarmaceutas() == null) cache.setFarmaceutas(new java.util.ArrayList<>());
-            return cache;
-        } catch (Exception e) {
-            throw new RuntimeException("Error cargando XML: " + xmlPath, e);
         }
+        return null;
     }
 
-    public synchronized void save(FarmaceutaConector data) {
-        try {
-            Marshaller m = ctx.createMarshaller();
-            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            m.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+    public Farmaceuta findById(int id) throws SQLException {
+        String sql = "SELECT * FROM farmaceuta WHERE id = ?";
+        Farmaceuta farmaceuta = null;
+        try (Connection cn = DB.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
 
-            File out = xmlPath.toFile();
-            File parent = out.getParentFile();
-            if (parent != null) parent.mkdirs();
-
-            m.marshal(data, out);
-            cache = data;
-        } catch (Exception e) {
-            throw new RuntimeException("Error guardando XML: " + xmlPath, e);
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    farmaceuta = new Farmaceuta(
+                            rs.getString("identificacion"),
+                            rs.getString("nombre"),
+                            rs.getString("clave")
+                    );
+                }
+            }
         }
+        return farmaceuta;
     }
 
-    public Path getXmlPath() { return xmlPath; }
+    public List<Farmaceuta> findAll() throws SQLException {
+        List<Farmaceuta> lista = new ArrayList<>();
+        String sql = "SELECT * FROM farmaceuta ORDER BY id";
+
+        try (Connection cn = DB.getConnection();
+             Statement st = cn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Farmaceuta farmaceuta = new Farmaceuta(
+                        rs.getString("identificacion"),
+                        rs.getString("nombre"),
+                        rs.getString("clave")
+                );
+                lista.add(farmaceuta);
+            }
+        }
+        return lista;
+    }
+
+    public Farmaceuta update(Farmaceuta farmaceuta) throws SQLException {
+        String sql = "UPDATE farmaceuta SET nombre=?, clave=? WHERE identificacion=?";
+        try (Connection cn = DB.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+
+            ps.setString(1, farmaceuta.getNombre());
+            ps.setString(2, farmaceuta.getIdentificacion());
+            ps.setString(3, farmaceuta.getClave());
+            ps.executeUpdate();
+        }
+        return farmaceuta;
+    }
+
+    public int delete(int id) throws SQLException {
+        String sql = "DELETE FROM farmaceuta WHERE id = " + id;
+        try (Connection cn = DB.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            return ps.executeUpdate();
+        }
+    }
 }

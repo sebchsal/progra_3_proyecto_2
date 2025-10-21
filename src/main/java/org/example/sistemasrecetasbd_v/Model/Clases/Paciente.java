@@ -21,18 +21,6 @@ public class Paciente {
         this.telefono = telefono;
     }
 
-    // Constructor especial para XML
-    public Paciente(int id, String identificacion, String nombre, LocalDate fechaNacimiento, String telefono) {
-        this.id = id;
-        this.nombre = nombre;
-        this.identificacion = identificacion;
-        setFechaNacimiento(fechaNacimiento); // calcula y valida edad
-        this.telefono = telefono;
-
-        // sincroniza la secuencia con el ID leído
-        SEQ.updateAndGet(cur -> Math.max(cur, id + 1));
-    }
-
     public String getIdentificacion() {
         return identificacion;
     }

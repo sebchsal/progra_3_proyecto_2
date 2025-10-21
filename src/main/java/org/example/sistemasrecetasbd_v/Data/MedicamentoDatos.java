@@ -1,69 +1,90 @@
 package org.example.sistemasrecetasbd_v.Data;
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.Marshaller;
-import jakarta.xml.bind.Unmarshaller;
-import org.example.sistemasrecetasbd_v.Data.Conector.MedicamentoConector;
-import org.example.sistemasrecetasbd_v.Data.Entity.MedicamentoEntity;
-
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Objects;
+import org.example.sistemasrecetasbd_v.Model.Clases.Medicamento;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MedicamentoDatos {
-    private final Path xmlPath;
-    private final JAXBContext ctx;
-    private MedicamentoConector cache;
 
-    public MedicamentoDatos(String filePath) {
-        try {
-            this.xmlPath = Path.of(Objects.requireNonNull(filePath));
-            this.ctx = JAXBContext.newInstance(MedicamentoConector.class, MedicamentoEntity.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Error inicializando JAXBContext", e);
-        }
-    }
+    public Medicamento insert(Medicamento medicamento) throws SQLException {
+        String sql = "INSERT INTO medicamento (codigo, nombre, tipo_presentacion) VALUES (?, ?, ?)";
+        try (Connection cn = DB.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-    public synchronized MedicamentoConector load() {
-        try {
-            if (cache != null) return cache;
+            ps.setString(1, medicamento.getCodigo());
+            ps.setString(2, medicamento.getNombre());
+            ps.setString(3, medicamento.getTipoPresentacion());
+            ps.executeUpdate();
 
-            if (!Files.exists(xmlPath)) {
-                cache = new MedicamentoConector();
-                save(cache);
-                return cache;
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    int id = rs.getInt(1);
+                    return findById(id);
+                }
             }
-            Unmarshaller u = ctx.createUnmarshaller();
-            cache = (MedicamentoConector) u.unmarshal(xmlPath.toFile());
-            if (cache.getMedicamentos() == null) cache.setMedicamentos(new java.util.ArrayList<>());
-            return cache;
-        } catch (Exception e) {
-            throw new RuntimeException("Error cargando XML: " + xmlPath, e);
         }
+        return null;
     }
 
-    public synchronized void save(MedicamentoConector data) {
-        try {
-            Marshaller m = ctx.createMarshaller();
-            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            m.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+    public Medicamento findById(int id) throws SQLException {
+        String sql = "SELECT * FROM medicamento WHERE id = ?";
+        Medicamento medicamento = null;
+        try (Connection cn = DB.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
 
-            File out = xmlPath.toFile();
-            File parent = out.getParentFile();
-            if (parent != null) parent.mkdirs();
-
-            java.io.StringWriter sw = new java.io.StringWriter();
-            m.marshal(data, sw);
-            System.out.println("[DEBUG] XML Medicamentos:\n" + sw);
-
-            m.marshal(data, out);
-
-            cache = data;
-        } catch (Exception e) {
-            throw new RuntimeException("Error guardando XML: " + xmlPath, e);
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    medicamento = new Medicamento(
+                            rs.getString("codigo"),
+                            rs.getString("nombre"),
+                            rs.getString("tipo_presentacion")
+                    );
+                }
+            }
         }
+        return medicamento;
     }
 
-    public Path getXmlPath() { return xmlPath; }
+    public List<Medicamento> findAll() throws SQLException {
+        List<Medicamento> lista = new ArrayList<>();
+        String sql = "SELECT * FROM medicamento";
+        try (Connection cn = DB.getConnection();
+             Statement st = cn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Medicamento medicamento = new Medicamento(
+                        rs.getString("codigo"),
+                        rs.getString("nombre"),
+                        rs.getString("tipo_presentacion")
+                );
+                lista.add(medicamento);
+            }
+        }
+        return lista;
+    }
+
+    public Medicamento update(Medicamento medicamento) throws SQLException {
+        String sql = "UPDATE medicamento SET nombre=?, tipo_presentacion=? WHERE codigo=?";
+        try (Connection cn = DB.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+
+            ps.setString(1, medicamento.getNombre());
+            ps.setString(2, medicamento.getTipoPresentacion());
+            ps.setString(3, medicamento.getCodigo());
+            ps.executeUpdate();
+        }
+        return medicamento;
+    }
+
+    public int delete(int id) throws SQLException {
+        String sql = "DELETE FROM medicamento WHERE id = " + id;
+        try (Connection cn = DB.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            return ps.executeUpdate();
+        }
+    }
 }
+

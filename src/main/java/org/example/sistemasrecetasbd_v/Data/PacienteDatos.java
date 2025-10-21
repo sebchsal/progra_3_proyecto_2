@@ -1,69 +1,103 @@
 package org.example.sistemasrecetasbd_v.Data;
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.Marshaller;
-import jakarta.xml.bind.Unmarshaller;
-import org.example.sistemasrecetasbd_v.Data.Conector.PacienteConector;
-import org.example.sistemasrecetasbd_v.Data.Entity.PacienteEntity;
-
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Objects;
+import org.example.sistemasrecetasbd_v.Model.Clases.Paciente;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class PacienteDatos {
-    private final Path xmlPath;
-    private final JAXBContext ctx;
-    private PacienteConector cache;
 
-    public PacienteDatos(String filePath) {
-        try {
-            this.xmlPath = Path.of(Objects.requireNonNull(filePath));
-            this.ctx = JAXBContext.newInstance(PacienteConector.class, PacienteEntity.class);
-        } catch (Exception e) {
-            throw new RuntimeException("Error inicializando JAXBContext", e);
-        }
-    }
+    public Paciente insert(Paciente paciente) throws SQLException {
+        String sql = "INSERT INTO paciente (identificacion, nombre, fecha_nacimiento, telefono) VALUES (?, ?, ?, ?)";
+        try (Connection cn = DB.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-    public synchronized PacienteConector load() {
-        try {
-            if (cache != null) return cache;
+            ps.setString(1, paciente.getIdentificacion());
+            ps.setString(2, paciente.getNombre());
+            if (paciente.getFechaNacimiento() != null)
+                ps.setDate(3, Date.valueOf(paciente.getFechaNacimiento()));
+            else
+                ps.setNull(3, Types.DATE);
+            ps.setString(4, paciente.getTelefono());
+            ps.executeUpdate();
 
-            if (!Files.exists(xmlPath)) {
-                cache = new PacienteConector();
-                save(cache);
-                return cache;
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    int id = rs.getInt(1);
+                    return findById(id);
+                }
             }
-            Unmarshaller u = ctx.createUnmarshaller();
-            cache = (PacienteConector) u.unmarshal(xmlPath.toFile());
-            if (cache.getPacientes() == null) cache.setPacientes(new java.util.ArrayList<>());
-            return cache;
-        } catch (Exception e) {
-            throw new RuntimeException("Error cargando XML: " + xmlPath, e);
         }
+        return null;
     }
 
-    public synchronized void save(PacienteConector data) {
-        try {
-            Marshaller m = ctx.createMarshaller();
-            m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
-            m.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+    public Paciente findById(int id) throws SQLException {
+        String sql = "SELECT * FROM paciente WHERE id = ?";
+        Paciente paciente = null;
+        try (Connection cn = DB.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
 
-            File out = xmlPath.toFile();
-            File parent = out.getParentFile();
-            if (parent != null) parent.mkdirs();
-
-            java.io.StringWriter sw = new java.io.StringWriter();
-            m.marshal(data, sw);
-            System.out.println("[DEBUG] XML Pacientes:\n" + sw);
-
-            m.marshal(data, out);
-
-            cache = data;
-        } catch (Exception e) {
-            throw new RuntimeException("Error guardando XML: " + xmlPath, e);
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    paciente = new Paciente(
+                            rs.getString("identificacion"),
+                            rs.getString("nombre"),
+                            rs.getDate("fecha_nacimiento") != null ?
+                                    rs.getDate("fecha_nacimiento").toLocalDate() : null,
+                            rs.getString("telefono")
+                    );
+                }
+            }
         }
+        return paciente;
     }
 
-    public Path getXmlPath() { return xmlPath; }
+    public List<Paciente> findAll() throws SQLException {
+        List<Paciente> lista = new ArrayList<>();
+        String sql = "SELECT * FROM paciente ORDER BY id";
+
+        try (Connection cn = DB.getConnection();
+             Statement st = cn.createStatement();
+             ResultSet rs = st.executeQuery(sql)) {
+
+            while (rs.next()) {
+                Paciente paciente = new Paciente(
+                        rs.getString("identificacion"),
+                        rs.getString("nombre"),
+                        rs.getDate("fecha_nacimiento") != null ?
+                                rs.getDate("fecha_nacimiento").toLocalDate() : null,
+                        rs.getString("telefono")
+                );
+                lista.add(paciente);
+            }
+        }
+        return lista;
+    }
+
+    public Paciente update(Paciente paciente) throws SQLException {
+        String sql = "UPDATE paciente SET nombre=?, fecha_nacimiento=?, telefono=? WHERE identificacion=?";
+        try (Connection cn = DB.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+
+            ps.setString(1, paciente.getNombre());
+            if (paciente.getFechaNacimiento() != null)
+                ps.setDate(2, Date.valueOf(paciente.getFechaNacimiento()));
+            else
+                ps.setNull(2, Types.DATE);
+            ps.setString(3, paciente.getTelefono());
+            ps.setString(4, paciente.getIdentificacion());
+            ps.executeUpdate();
+        }
+        return paciente;
+    }
+
+    public int delete(int id) throws SQLException {
+        String sql = "DELETE FROM paciente WHERE id = " + id;
+        try (Connection cn = DB.getConnection();
+             PreparedStatement ps = cn.prepareStatement(sql)) {
+            return ps.executeUpdate();
+        }
+    }
 }
+

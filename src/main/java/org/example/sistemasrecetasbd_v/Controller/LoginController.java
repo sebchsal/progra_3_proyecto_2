@@ -105,7 +105,7 @@ public class LoginController {
 
     private void loadInicioScreen() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemarecetas/Inicio.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemasrecetasbd_v/Inicio.fxml"));
             Parent root = loader.load();
             InicioController inicioController = loader.getController();
             inicioController.setListas(listaMedicos, listaFarmaceutas, listaPacientes, catalogoMedicamentos, historicoRecetas);
@@ -139,7 +139,7 @@ public class LoginController {
                 progress.setVisible(false);
                 btnIngresarLogin.setVisible(true);
                 try {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemarecetas/CambiarContrasena.fxml"));
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemasrecetasbd_v/CambiarContrasena.fxml"));
                     Parent root = loader.load();
                     CambiarContrasenaController ctrl = loader.getController();
                     String identificacionPreCargada =

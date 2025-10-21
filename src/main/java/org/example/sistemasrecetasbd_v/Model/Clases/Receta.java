@@ -25,19 +25,6 @@ public class Receta {
         this.fechaEntrega = fechaE;
     }
 
-    // Para guardar en xml
-    public Receta(int id, String estado, int cantidad, String detalle, Medicamento medicamento, Paciente paciente, LocalDate fechaC, LocalDate fechaE) {
-        this.id = id;
-        this.estado = estado;
-        this.cantidad = cantidad;
-        this.detalle = detalle;
-        this.medicamento = medicamento;
-        this.paciente = paciente;
-        this.fechaConfeccion = fechaC;
-        this.fechaEntrega = fechaE;
-        SEQ.updateAndGet(cur -> Math.max(cur, id + 1));
-    }
-
     public int getId() {
         return id;
     }

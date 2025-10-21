@@ -71,7 +71,7 @@ public class DespachoController {
             return;
         }
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemarecetas/HistorialRecetas.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemasrecetasbd_v/HistorialRecetas.fxml"));
             Parent root = loader.load();
             HistorialRecetasController ctrl = loader.getController();
             ctrl.setHistorico(historicoRecetas);

@@ -1,124 +1,54 @@
 package org.example.sistemasrecetasbd_v.Logica;
 
-import org.example.sistemasrecetasbd_v.Logica.Mapper.MedicoMapper;
-import org.example.sistemasrecetasbd_v.Data.Conector.MedicoConector;
 import org.example.sistemasrecetasbd_v.Data.MedicoDatos;
-import org.example.sistemasrecetasbd_v.Data.Entity.MedicoEntity;
 import org.example.sistemasrecetasbd_v.Model.Clases.Medico;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.List;
 
 public class MedicoLogica {
-    private final MedicoDatos store;
+    
+    private final MedicoDatos medicoDatos = new MedicoDatos();
 
-    public MedicoLogica(String rutaArchivo) {
-        this.store = new MedicoDatos(rutaArchivo);
+    public Medico insert(Medico medico) throws SQLException {
+        validarNuevo(medico);
+        return medicoDatos.insert(medico);
     }
 
-    public List<Medico> findAll() {
-        MedicoConector data = store.load();
-        return data.getMedicos().stream()
-                .map(MedicoMapper::toModel)
-                .collect(Collectors.toList());
+    public Medico findById(int id) throws SQLException {
+        return medicoDatos.findById(id);
     }
 
-    public Optional<Medico> findById(int id) {
-        MedicoConector data = store.load();
-        return data.getMedicos().stream()
-                .filter(x -> x.getId() == id)
-                .findFirst()
-                .map(MedicoMapper::toModel);
+    public List<Medico> findAll() throws SQLException {
+        return medicoDatos.findAll();
     }
 
-    public List<Medico> searchByNombreOIdentificacion(String texto) {
-        String q = (texto == null) ? "" : texto.trim().toLowerCase();
-        MedicoConector data = store.load();
-        return data.getMedicos().stream()
-                .filter(x ->
-                        (x.getNombre() != null && x.getNombre().toLowerCase().contains(q)) ||
-                                (x.getIdentificacion() != null && x.getIdentificacion().toLowerCase().contains(q)) ||
-                                (x.getEspecialidad() != null && x.getEspecialidad().toLowerCase().contains(q))
-                )
-                .map(MedicoMapper::toModel)
-                .collect(Collectors.toList());
-    }
-
-    public Medico create(Medico nuevo) {
-        validarNuevo(nuevo);
-        MedicoConector data = store.load();
-
-        // Unicidad por identificación
-        if (nuevo.getIdentificacion() != null && !nuevo.getIdentificacion().isBlank()) {
-            boolean existsIdent = data.getMedicos().stream()
-                    .anyMatch(x -> nuevo.getIdentificacion().equalsIgnoreCase(x.getIdentificacion()));
-            if (existsIdent) throw new IllegalArgumentException("Ya existe un médico con esa identificación.");
-        }
-
-        MedicoEntity x = MedicoMapper.toXml(nuevo);
-        data.getMedicos().add(x);
-        store.save(data);
-        return MedicoMapper.toModel(x);
-    }
-
-    public Medico update(Medico medico) {
+    public Medico update(Medico medico) throws SQLException {
         if (medico == null || medico.getId() <= 0)
-            throw new IllegalArgumentException("El médico a actualizar requiere un ID válido.");
+            throw new IllegalArgumentException("El medico a actualizar requiere un ID válido.");
         validarCampos(medico);
-
-        MedicoConector data = store.load();
-
-        // Validar identificación duplicada
-        if (medico.getIdentificacion() != null && !medico.getIdentificacion().isBlank()) {
-            boolean conflict = data.getMedicos().stream()
-                    .anyMatch(x -> x.getId() != medico.getId()
-                            && medico.getIdentificacion().equalsIgnoreCase(x.getIdentificacion()));
-            if (conflict) throw new IllegalArgumentException("Otro médico ya tiene esa identificación.");
-        }
-
-        for (int i = 0; i < data.getMedicos().size(); i++) {
-            MedicoEntity actual = data.getMedicos().get(i);
-            if (actual.getId() == medico.getId()) {
-                MedicoEntity actualizado = MedicoMapper.toXml(medico);
-                actualizado.setId(actual.getId());
-                data.getMedicos().set(i, actualizado);
-                store.save(data);
-                return medico;
-            }
-        }
-        throw new NoSuchElementException("No existe médico con id: " + medico.getId());
+        return medicoDatos.update(medico);
     }
 
-    public boolean deleteById(int id) {
+    public boolean delete(int id) throws SQLException {
         if (id <= 0) return false;
-        MedicoConector data = store.load();
-        boolean removed = data.getMedicos().removeIf(x -> x.getId() == id);
-        if (removed) store.save(data);
-        return removed;
+        return medicoDatos.delete(id) > 0;
     }
-
 
     // --------- Helpers ---------
+
     private void validarNuevo(Medico m) {
-        if (m == null) throw new IllegalArgumentException("Médico nulo.");
+        if (m == null) throw new IllegalArgumentException("Medico nulo.");
         validarCampos(m);
     }
 
     private void validarCampos(Medico m) {
+        if(m.getIdentificacion() == null || m.getIdentificacion().isBlank())
+            throw new IllegalArgumentException("La identificacion es obligatorio.");
         if (m.getNombre() == null || m.getNombre().isBlank())
             throw new IllegalArgumentException("El nombre es obligatorio.");
-        if (m.getIdentificacion() == null || m.getIdentificacion().isBlank())
-            throw new IllegalArgumentException("La identificación es obligatoria.");
         if (m.getEspecialidad() == null || m.getEspecialidad().isBlank())
-            throw new IllegalArgumentException("La especialidad es obligatoria.");
-        if (m.getClave() == null || m.getClave().isBlank())
-            throw new IllegalArgumentException("La clave es obligatoria.");
-    }
-
-    private int generarSiguienteId(MedicoConector data) {
-        return data.getMedicos().stream()
-                .mapToInt(MedicoEntity::getId)
-                .max()
-                .orElse(0) + 1;
+            throw new IllegalArgumentException("La especialidad es obligatorio.");
     }
 }

@@ -12,7 +12,7 @@
 <?import javafx.scene.text.Font?>
 
 
-<AnchorPane prefHeight="408.0" prefWidth="399.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.sistemarecetas.Controller.DetalleController">
+<AnchorPane prefHeight="408.0" prefWidth="399.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.sistemasrecetasbd_v.Controller.DetalleController">
    <children>
       <ImageView fitHeight="33.0" fitWidth="71.0" layoutX="164.0" layoutY="14.0" pickOnBounds="true" preserveRatio="true">
          <image>

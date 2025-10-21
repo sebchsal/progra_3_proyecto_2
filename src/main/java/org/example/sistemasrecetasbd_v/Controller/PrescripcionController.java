@@ -59,6 +59,7 @@ public class PrescripcionController {
         this.catalogoMedicamentos = cm;
         this.historicoRecetas = hr;
         this.recetaLogica = rl;
+        if (this.recetaLogica == null) this.recetaLogica = new RecetaLogica();
         // Refrescar observables
         observablePacientes.setAll(this.listaPacientes.getItems());
         observableMedicamentos.setAll(this.catalogoMedicamentos.getItems());
@@ -203,14 +204,25 @@ public class PrescripcionController {
         if (historicoRecetas == null) {
             historicoRecetas = new HistoricoRecetas();
         }
-        // Validar selección
+        // si el usuario no hizo doble click, toma la selección actual de la tabla
         if (pacienteSeleccionado == null) {
-            mostrarAlerta("Error en seleccion","Seleccione un paciente (doble click en la tabla).");
+            pacienteSeleccionado = tblPacientesPrescripcion.getSelectionModel().getSelectedItem();
+        }
+        if (medicamentoSeleccionado == null) {
+            medicamentoSeleccionado = tblMedicamentosPrescripcion.getSelectionModel().getSelectedItem();
+        }
+        // Validar selección efectiva
+        if (pacienteSeleccionado == null) {
+            mostrarAlerta("Error en seleccion","Seleccione un paciente (doble click o selección en la tabla).");
             return;
         }
         if (medicamentoSeleccionado == null) {
-            mostrarAlerta("Error en seleccion","Seleccione un medicamento (doble click en la tabla).");
+            mostrarAlerta("Error en seleccion","Seleccione un medicamento (doble click o selección en la tabla).");
             return;
+        }
+        // Garantiza que la capa lógica exista aunque no te la hayan pasado en setListas
+        if (recetaLogica == null) {
+            recetaLogica = new RecetaLogica();
         }
         try{
             // Fechas
@@ -228,8 +240,8 @@ public class PrescripcionController {
             String detalle = txtAreaDetallesPrescripcion.getText() == null ? "" : txtAreaDetallesPrescripcion.getText().trim();
             if (cantidad <= 0 && detalle.isEmpty()) {
                 mostrarAlerta("Error", "Cantidad debe ser mayor a cero y debe haber un detelle");
-                return; }
-
+                return;
+            }
             // Evitar duplicados
             boolean duplicada = historicoRecetas.getItems().stream().anyMatch(r ->
                     r != null && r.getPaciente() != null && r.getMedicamento() != null &&
@@ -243,13 +255,19 @@ public class PrescripcionController {
                 return;
             }
             Receta nueva = new Receta("confeccionada", cantidad, detalle, medicamentoSeleccionado, pacienteSeleccionado, confe, entre);
-            historicoRecetas.agregarOReemplazar(nueva);
-            recetaLogica.create(nueva);
+            // 1) persistir primero en BD
+            Receta persistida = recetaLogica.insert(nueva);
+            if (persistida == null) {
+                mostrarAlerta("Error", "No se pudo guardar la receta en la base de datos.");
+                return;
+            }
+            // 2) luego reflejar en histórico/UI
+            historicoRecetas.agregarOReemplazar(persistida);
             spnCantidadPrescripcion.getValueFactory().setValue(1);
             txtAreaDetallesPrescripcion.clear();
             Stage stage = (Stage) txtduracionReceta.getScene().getWindow();
             stage.close();
-        }catch (Exception e){
+        } catch (Exception e){
             mostrarAlerta("Error", e.getMessage());
         }
     }

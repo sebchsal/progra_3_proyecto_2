@@ -8,7 +8,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 
-<AnchorPane prefHeight="337.0" prefWidth="470.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.sistemarecetas.Controller.HistorialRecetasController">
+<AnchorPane prefHeight="337.0" prefWidth="470.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.sistemasrecetasbd_v.Controller.HistorialRecetasController">
    <children>
       <TabPane prefHeight="338.0" prefWidth="470.0" tabClosingPolicy="UNAVAILABLE">
         <tabs>

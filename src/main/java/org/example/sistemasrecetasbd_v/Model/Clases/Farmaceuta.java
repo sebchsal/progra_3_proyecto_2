@@ -11,12 +11,6 @@ public class Farmaceuta extends Usuario {
         this.id = SEQ.getAndIncrement();
     }
 
-    public Farmaceuta(int id, String identificacion, String nombre, String clave) {
-        super(identificacion, nombre, clave);
-        this.id = id;
-        SEQ.updateAndGet(cur -> Math.max(cur, id + 1));
-    }
-
     @Override public int getId() { return id; }
 
     public static void resetSequenceTo(int nextValue) {

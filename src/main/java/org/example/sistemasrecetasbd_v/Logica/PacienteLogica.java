@@ -1,105 +1,57 @@
 package org.example.sistemasrecetasbd_v.Logica;
 
-import org.example.sistemasrecetasbd_v.Logica.Mapper.PacienteMapper;
-import org.example.sistemasrecetasbd_v.Data.Conector.PacienteConector;
 import org.example.sistemasrecetasbd_v.Data.PacienteDatos;
-import org.example.sistemasrecetasbd_v.Data.Entity.PacienteEntity;
 import org.example.sistemasrecetasbd_v.Model.Clases.Paciente;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.List;
 
 public class PacienteLogica {
-    private final PacienteDatos store;
 
-    public PacienteLogica(String rutaArchivo) {
-        this.store = new PacienteDatos(rutaArchivo);
+    private final PacienteDatos pacienteDatos = new PacienteDatos();
+
+    public Paciente insert(Paciente paciente) throws SQLException {
+        validarNuevo(paciente);
+        return pacienteDatos.insert(paciente);
     }
 
-    public List<Paciente> findAll() {
-        PacienteConector data = store.load();
-        return data.getPacientes().stream()
-                .map(PacienteMapper::toModel)
-                .collect(Collectors.toList());
+    public Paciente findById(int id) throws SQLException {
+        return pacienteDatos.findById(id);
     }
 
-    public Optional<Paciente> findById(int id) {
-        PacienteConector data = store.load();
-        return data.getPacientes().stream()
-                .filter(x -> x.getId() == id)
-                .findFirst()
-                .map(PacienteMapper::toModel);
+    public List<Paciente> findAll() throws SQLException {
+        return pacienteDatos.findAll();
     }
 
-    public List<Paciente> searchByNombreOIdentificacion(String texto) {
-        String q = (texto == null) ? "" : texto.trim().toLowerCase();
-        PacienteConector data = store.load();
-        return data.getPacientes().stream()
-                .filter(x -> (x.getNombre() != null && x.getNombre().toLowerCase().contains(q)) ||
-                        (x.getIdentificacion() != null && x.getIdentificacion().toLowerCase().contains(q)) ||
-                        (x.getTelefono() != null && x.getTelefono().toLowerCase().contains(q)))
-                .map(PacienteMapper::toModel)
-                .collect(Collectors.toList());
-    }
-
-    public Paciente create(Paciente nuevo) {
-        validarNuevo(nuevo);
-        PacienteConector data = store.load();
-
-        boolean existsIdent = data.getPacientes().stream()
-                .anyMatch(x -> nuevo.getIdentificacion().equalsIgnoreCase(x.getIdentificacion()));
-        if (existsIdent) throw new IllegalArgumentException("Ya existe un paciente con esa identificación.");
-
-        PacienteEntity x = PacienteMapper.toXml(nuevo);
-        data.getPacientes().add(x);
-        store.save(data);
-        return PacienteMapper.toModel(x);
-    }
-
-    public Paciente update(Paciente paciente) {
+    public Paciente update(Paciente paciente) throws SQLException {
         if (paciente == null || paciente.getId() <= 0)
             throw new IllegalArgumentException("El paciente a actualizar requiere un ID válido.");
         validarCampos(paciente);
-
-        PacienteConector data = store.load();
-
-        boolean conflict = data.getPacientes().stream()
-                .anyMatch(x -> x.getId() != paciente.getId()
-                        && paciente.getIdentificacion().equalsIgnoreCase(x.getIdentificacion()));
-        if (conflict) throw new IllegalArgumentException("Otro paciente ya tiene esa identificación.");
-
-        for (int i = 0; i < data.getPacientes().size(); i++) {
-            PacienteEntity actual = data.getPacientes().get(i);
-            if (actual.getId() == paciente.getId()) {
-                PacienteEntity actualizado = PacienteMapper.toXml(paciente);
-                actualizado.setId(actual.getId());
-                data.getPacientes().set(i, actualizado);
-                store.save(data);
-                return paciente;
-            }
-        }
-        throw new NoSuchElementException("No existe paciente con id: " + paciente.getId());
+        return pacienteDatos.update(paciente);
     }
 
-    public boolean deleteById(int id) {
+    public boolean delete(int id) throws SQLException {
         if (id <= 0) return false;
-        PacienteConector data = store.load();
-        boolean removed = data.getPacientes().removeIf(x -> x.getId() == id);
-        if (removed) store.save(data);
-        return removed;
+        return pacienteDatos.delete(id) > 0;
     }
 
     // --------- Helpers ---------
+
     private void validarNuevo(Paciente p) {
         if (p == null) throw new IllegalArgumentException("Paciente nulo.");
         validarCampos(p);
     }
 
     private void validarCampos(Paciente p) {
+        if(p.getIdentificacion() == null || p.getIdentificacion().isBlank())
+            throw new IllegalArgumentException("La identificacion es obligatorio.");
         if (p.getNombre() == null || p.getNombre().isBlank())
             throw new IllegalArgumentException("El nombre es obligatorio.");
-        if (p.getIdentificacion() == null || p.getIdentificacion().isBlank())
-            throw new IllegalArgumentException("La identificación es obligatoria.");
-
+        if (p.getFechaNacimiento() != null && p.getFechaNacimiento().isAfter(LocalDate.now()))
+            throw new IllegalArgumentException("Fecha nacimiento no valida.");
+        if (p.getTelefono() == null || p.getTelefono().isBlank())
+            throw new IllegalArgumentException("El telefono es obligatorio.");
     }
 }
+

@@ -1,7 +1,5 @@
 package org.example.sistemasrecetasbd_v.Controller;
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.Unmarshaller;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -19,17 +17,16 @@ import javafx.stage.Stage;
 import org.example.sistemasrecetasbd_v.Logica.*;
 import org.example.sistemasrecetasbd_v.Model.Clases.*;
 import org.example.sistemasrecetasbd_v.Model.Listas.*;
-import org.example.sistemasrecetasbd_v.Data.Conector.MedicamentoConector;
-import org.example.sistemasrecetasbd_v.Data.Conector.MedicoConector;
-import org.example.sistemasrecetasbd_v.Data.Conector.FarmaceutaConector;
-import org.example.sistemasrecetasbd_v.Data.Conector.PacienteConector;
 
-
-import java.io.File;
+import java.io.IOException;
 import java.net.URL;
-import java.time.format.DateTimeFormatter;
+import java.sql.SQLException;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import javafx.beans.property.ReadOnlyStringWrapper;
+import java.time.format.DateTimeFormatter;
 
 public class InicioController implements Initializable {
     @FXML private Button btncerrarsesion;
@@ -47,10 +44,8 @@ public class InicioController implements Initializable {
     // Datos de Medicos
     private ListaMedicos listaMedicos;
     private final ObservableList<Medico> observableMedicos = FXCollections.observableArrayList();
-    // Persistencia de Medicos
-    private static final String RUTA_MEDICOS = java.nio.file.Paths
-            .get(System.getProperty("user.dir"), "Base de datos", "Medicos.xml").toString();
-    private final MedicoLogica medicoLogica = new MedicoLogica(RUTA_MEDICOS);
+    // Datos para tabla de Medicos en BD
+    private final MedicoLogica medicoLogica = new MedicoLogica();
 
     // Tabla de Farmaceutas
     @FXML private TableView<Farmaceuta> tblListaFarmaceutas;
@@ -59,10 +54,8 @@ public class InicioController implements Initializable {
     // Datos de Farmaceutas...
     private ListaFarmaceutas listaFarmaceutas;
     private ObservableList<Farmaceuta> observableFarmaceutas = FXCollections.observableArrayList();
-    // Persistencia de Farmaceutas
-    private static final String RUTA_FARMACEUTAS = java.nio.file.Paths
-            .get(System.getProperty("user.dir"), "Base de datos", "Farmaceutas.xml").toString();
-    private final FarmaceutaLogica farmaceutaLogica = new FarmaceutaLogica(RUTA_FARMACEUTAS);
+    // Datos para tabla de Farmaceutas en BD
+    private final FarmaceutaLogica farmaceutaLogica = new FarmaceutaLogica();
 
     // Tabla de pacientes
     @FXML private TableView<Paciente> tblListaPacientes;
@@ -72,10 +65,8 @@ public class InicioController implements Initializable {
     // Datos de pacientes
     private ListaPacientes listaPacientes;
     private final ObservableList<Paciente> observablePacientes = FXCollections.observableArrayList();
-    // Persistencia de Pacientes
-    private static final String RUTA_PACIENTES = java.nio.file.Paths
-            .get(System.getProperty("user.dir"), "Base de datos", "Pacientes.xml").toString();
-    private final PacienteLogica pacienteLogica = new PacienteLogica(RUTA_PACIENTES);
+    // Datos para tabla de Pacientes en BD
+    private final PacienteLogica pacienteLogica = new PacienteLogica();
 
     // Table de Medicamentos
     @FXML private TableView<Medicamento> tblListaMedicamentos;
@@ -84,10 +75,8 @@ public class InicioController implements Initializable {
     @FXML private Button btnPrescripcion, btnDespacho;
     private CatalogoMedicamentos catalogoMedicamentos;
     private final ObservableList<Medicamento> observableMedicamentos = FXCollections.observableArrayList();
-    // Persistencia de Medicamentos
-    private static final String RUTA_MEDICAMENTOS = java.nio.file.Paths
-            .get(System.getProperty("user.dir"), "Base de datos", "Medicamentos.xml").toString();
-    private final MedicamentoLogica medicamentoLogica = new MedicamentoLogica(RUTA_MEDICAMENTOS);
+    // Datos para tabla de Medicamento en BD
+    private final MedicamentoLogica medicamentoLogica = new MedicamentoLogica();
 
     // Table de Recetas
     private HistoricoRecetas historicoRecetas;
@@ -95,10 +84,8 @@ public class InicioController implements Initializable {
     @FXML private TableView<Receta> tblListaHistorial;
     @FXML private TableColumn<Receta, String> colCodigoHistorial, colMedicamentoHistorial,
             colPacienteHistorial, colEstadoHistorial, colcantHistorial;
-    // Persistencia de Recetas
-    private static final String RUTA_RECETAS = java.nio.file.Paths
-            .get(System.getProperty("user.dir"), "Base de datos", "Recetas.xml").toString();
-    private final RecetaLogica recetaLogica = new RecetaLogica(RUTA_RECETAS);
+    // Datos para tabla de Receta en BD
+    private final RecetaLogica recetaLogica = new RecetaLogica();
 
     // Dashboard
     // Tabla de busqueda de medicamentos en dashboard
@@ -128,7 +115,7 @@ public class InicioController implements Initializable {
     //Para formatear la fecha de nacimiento
     private static final DateTimeFormatter FECHA_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    public void setListas(ListaMedicos lm, ListaFarmaceutas lf, ListaPacientes lp, CatalogoMedicamentos cm, HistoricoRecetas hr) {
+    public void setListas(ListaMedicos lm, ListaFarmaceutas lf, ListaPacientes lp, CatalogoMedicamentos cm, HistoricoRecetas hr) throws SQLException {
         this.listaMedicos = lm;
         this.listaFarmaceutas = lf;
         this.listaPacientes = lp;
@@ -153,29 +140,12 @@ public class InicioController implements Initializable {
         colIdentificacionMedicos.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getIdentificacion())));
         colNombreMedicos.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getNombre()));
         colEspecialidadMedicos.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getEspecialidad()));
-        // Cargar medicos desde XML
-        try {
-            JAXBContext ctx = JAXBContext.newInstance(MedicoConector.class);
-            Unmarshaller um = ctx.createUnmarshaller();
-            MedicoConector wrapper = (MedicoConector) um.unmarshal(new File("medicos.xml"));
-            listaMedicos = wrapper.toListaMedicos();
-        } catch (Exception e) {
-            listaMedicos = new ListaMedicos(); // si no hay archivo, empezamos vacío
-        }
 
         // Configurar las columnas de farmaceutas
         colIDFarmaceutas.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getId())));
         colIdentificacionFarmaceutas.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getIdentificacion())));
         colNombreFarmaceutas.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getNombre()));
         // Cargar farmaceutas desde XML
-        try {
-            JAXBContext ctx = JAXBContext.newInstance(FarmaceutaConector.class);
-            Unmarshaller um = ctx.createUnmarshaller();
-            FarmaceutaConector wrapper = (FarmaceutaConector) um.unmarshal(new File("farmaceutas.xml"));
-            listaFarmaceutas = wrapper.toListaFarmaceutas();
-        } catch (Exception e) {
-            listaFarmaceutas = new ListaFarmaceutas(); // si no hay archivo, empezamos vacío
-        }
 
         // Configurar las columnas de pacientes
         colIDPacientes.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getId())));
@@ -183,29 +153,11 @@ public class InicioController implements Initializable {
         colNombrePacientes.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getNombre())));
         colFechaNacimientoPacientes.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getFechaNacimiento() == null ? "" : cd.getValue().getFechaNacimiento().format(FECHA_FMT)));
         colTelefonoPaciente.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getTelefono() == null ? "" : cd.getValue().getTelefono()));
-        // Cargar pacientes desde XML
-        try {
-            JAXBContext ctx = JAXBContext.newInstance(PacienteConector.class);
-            Unmarshaller um = ctx.createUnmarshaller();
-            PacienteConector wrapper = (PacienteConector) um.unmarshal(new File("pacientes.xml"));
-            listaPacientes = wrapper.toListaPacientes();
-        } catch (Exception e) {
-            listaPacientes = new ListaPacientes(); // si no hay archivo, empezamos vacío
-        }
 
         // Configurar las columnas de medicamentos
         colCodigoMedicamentos.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getCodigo())));
         colNombreMedicamentos.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getNombre())));
         colPresentacionMedicamentos.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getTipoPresentacion())));
-        // Cargar medicamentos desde XML
-        try {
-            JAXBContext ctx = JAXBContext.newInstance(MedicamentoConector.class);
-            Unmarshaller um = ctx.createUnmarshaller();
-            MedicamentoConector wrapper = (MedicamentoConector) um.unmarshal(new File("medicamentos.xml"));
-            catalogoMedicamentos = wrapper.toCatalogoMedicamentos();   // convierte entidades a modelo
-        } catch (Exception e) {
-            catalogoMedicamentos = new CatalogoMedicamentos(); // si no hay archivo, empezamos vacío
-        }
 
         // Configurar las columnas de historial
         colCodigoHistorial.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getId())));
@@ -213,32 +165,11 @@ public class InicioController implements Initializable {
         colPacienteHistorial.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getPaciente().getNombre())));
         colEstadoHistorial.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getEstado())));
         colcantHistorial.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getCantidad())));
-        // Cargar recetas desde XML
-        try {
-            JAXBContext ctx = JAXBContext.newInstance(org.example.sistemarecetas.Persistencia.Conector.RecetaConector.class);
-            Unmarshaller um = ctx.createUnmarshaller();
-            org.example.sistemarecetas.Persistencia.Conector.RecetaConector wrapper =
-                    (org.example.sistemarecetas.Persistencia.Conector.RecetaConector) um.unmarshal(new File("recetas.xml"));
-            historicoRecetas = wrapper.toListaRecetas();  // convierte entidades a modelo
-        } catch (Exception e) {
-            historicoRecetas = new HistoricoRecetas(); // si no hay archivo, empezamos vacío
-        }
 
         // Dashboard
         // Configura columnas de medicamentos en el dashboard
         colCodigoMedicamentoDashboard.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getCodigo()));
         colMedicamentoDashboard.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getNombre()));
-        // Carga los medicamentos desde XML
-        try {
-            JAXBContext ctx = JAXBContext.newInstance(MedicamentoConector.class);
-            Unmarshaller um = ctx.createUnmarshaller();
-            MedicamentoConector wrapper = (MedicamentoConector) um.unmarshal(new File("medicamentos.xml"));
-            catalogoMedicamentos = wrapper.toCatalogoMedicamentos();
-            observableMedicamentosDashboard.setAll(catalogoMedicamentos.getItems());
-        } catch (Exception e) {
-            catalogoMedicamentos = new CatalogoMedicamentos();
-            observableMedicamentosDashboard.clear();
-        }
 
         tblMedicamentosDashboard.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         tblMedicamentosDashboard.getSelectionModel().getSelectedItems()
@@ -253,7 +184,7 @@ public class InicioController implements Initializable {
         tblMedicamentosDashboard.setItems(observableMedicamentosDashboard);
     }
 
-    private void updateTables() {
+    private void updateTables() throws SQLException {
         if (listaMedicos != null) {
             listaMedicos.setAll(medicoLogica.findAll());
             observableMedicos.setAll(listaMedicos.getItems());
@@ -363,8 +294,8 @@ public class InicioController implements Initializable {
                 return;
             }
             try {
-                Medico creado = medicoLogica.create(nuevo);
-                listaMedicos.agregarOReemplazar(nuevo);
+                Medico creado = medicoLogica.insert(nuevo);
+                listaMedicos.agregarOReemplazar(creado);
                 observableMedicos.add(nuevo);
             } catch (Exception e) {
                 mostrarAlerta("Error", e.getMessage());
@@ -409,7 +340,7 @@ public class InicioController implements Initializable {
         }
 
         try {
-            boolean ok = medicoLogica.deleteById(seleccionado.getId());
+            boolean ok = medicoLogica.delete(seleccionado.getId());
             if (ok) {
                 listaMedicos.eliminarPorId(seleccionado.getId());
                 observableMedicos.remove(seleccionado);
@@ -442,7 +373,7 @@ public class InicioController implements Initializable {
     // mostrar el formulario de agregarMedico.fxml para los botones agregar y modificar en tab medicos
     private Medico mostrarFormularioMedico(Medico medico, boolean editar) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemarecetas/AgregarMedicos.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemasrecetasbd_v/AgregarMedicos.fxml"));
             Parent root = loader.load();
 
             AgregarMedicosController controller = loader.getController();
@@ -475,7 +406,7 @@ public class InicioController implements Initializable {
                 return;
             }
             try {
-                Farmaceuta creado = farmaceutaLogica.create(nuevo);
+                Farmaceuta creado = farmaceutaLogica.insert(nuevo);
                 listaFarmaceutas.agregarOReemplazar(creado);
                 observableFarmaceutas.add(creado);
             } catch (Exception e) {
@@ -520,7 +451,7 @@ public class InicioController implements Initializable {
                 mostrarAlerta("Seleccione un farmaceuta", "Seleccione un farmaceuta de la tabla para eliminar.");
                 return;
             }
-            boolean eliminado = farmaceutaLogica.deleteById(seleccionado.getId());
+            boolean eliminado = farmaceutaLogica.delete(seleccionado.getId());
             if (!eliminado) {
                 mostrarAlerta("Error", "No se pudo eliminar el farmaceuta de la base de datos.");
                 return;
@@ -549,7 +480,7 @@ public class InicioController implements Initializable {
     // metodo para mostrar el formulario de agregarFarmaceuta en los botones de agregar y modificar en tab farmaceutas
     private Farmaceuta mostrarFormularioFarmaceuta(Farmaceuta farmaceuta, boolean editar) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemarecetas/AgregarFarmaceutas.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemasrecetasbd_v/AgregarFarmaceutas.fxml"));
             Parent root = loader.load();
 
             AgregarFarmaceutasController ctrl = loader.getController();
@@ -582,7 +513,7 @@ public class InicioController implements Initializable {
                 return;
             }
             try {
-                Paciente creado = pacienteLogica.create(nuevo);
+                Paciente creado = pacienteLogica.insert(nuevo);
                 listaPacientes.agregarOReemplazar(creado);
                 observablePacientes.add(creado);
             } catch (Exception e) {
@@ -628,7 +559,7 @@ public class InicioController implements Initializable {
                 return;
             }
 
-            boolean eliminado = pacienteLogica.deleteById(seleccionado.getId());
+            boolean eliminado = pacienteLogica.delete(seleccionado.getId());
             if (!eliminado) {
                 mostrarAlerta("Error", "No se pudo eliminar el paciente de la base de datos.");
                 return;
@@ -658,7 +589,7 @@ public class InicioController implements Initializable {
     // metodo para mostrar el formulario de agregarPaciente en los botones de agregar y modificar en tab pacientes
     private Paciente mostrarFormularioPaciente(Paciente paciente, boolean editar) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemarecetas/AgregarPaciente.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemasrecetasbd_v/AgregarPaciente.fxml"));
             Parent root = loader.load();
 
             AgregarPacienteController controller = loader.getController();
@@ -690,7 +621,7 @@ public class InicioController implements Initializable {
                 return;
             }
             try {
-                Medicamento creado = medicamentoLogica.create(nuevo);
+                Medicamento creado = medicamentoLogica.insert(nuevo);
                 catalogoMedicamentos.agregarOReemplazar(creado);
                 observableMedicamentos.add(creado);
                 observableMedicamentosDashboard.add(creado);
@@ -738,7 +669,7 @@ public class InicioController implements Initializable {
                 return;
             }
 
-            boolean eliminado = medicamentoLogica.deleteById(seleccionado.getId());
+            boolean eliminado = medicamentoLogica.delete(seleccionado.getId());
             if (!eliminado) {
                 mostrarAlerta("Error", "No se pudo eliminar el medicamento de la base de datos.");
                 return;
@@ -769,7 +700,7 @@ public class InicioController implements Initializable {
     // metodo para mostrar el formulario de agregarMedicamento en los botones de agregar y modificar en tab medicamentos
     private Medicamento mostrarFormularioMedicamentos(Medicamento medicamento, boolean editar) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemarecetas/AgregarMedicamento.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemasrecetasbd_v/AgregarMedicamento.fxml"));
             Parent root = loader.load();
 
             AgregarMedicamentoController ctrl = loader.getController();
@@ -791,7 +722,7 @@ public class InicioController implements Initializable {
     // metodo para abrir preescripcion
     @FXML private void abrirPrescripcion() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemarecetas/Prescripcion.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemasrecetasbd_v/Prescripcion.fxml"));
             Parent root = loader.load();
 
             PrescripcionController ctrl = loader.getController();
@@ -813,7 +744,7 @@ public class InicioController implements Initializable {
     // metodo para abrir despacho
     @FXML private void abrirDespacho() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemarecetas/Despacho.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemasrecetasbd_v/Despacho.fxml"));
             Parent root = loader.load();
             DespachoController ctrl = loader.getController();
             // Pasar referencia al historico como en abrirPrescripcion
@@ -842,7 +773,7 @@ public class InicioController implements Initializable {
             return;
         }
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemarecetas/DetalleReceta.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemasrecetasbd_v/DetalleReceta.fxml"));
             Parent root = loader.load();
 
             DetalleController controller = loader.getController();
@@ -973,7 +904,7 @@ public class InicioController implements Initializable {
     @FXML private void cerrarSesion() {
         try {
             LoginController.logout();
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemarecetas/Login.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemasrecetasbd_v/Login.fxml"));
             Parent root = loader.load();
             LoginController loginController = loader.getController();
             loginController.setListas(listaMedicos, listaFarmaceutas, listaPacientes, catalogoMedicamentos, historicoRecetas);

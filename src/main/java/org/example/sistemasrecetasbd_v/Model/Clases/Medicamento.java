@@ -16,17 +16,6 @@ public class Medicamento {
         this.tipoPresentacion = tipoPresentacion;
     }
 
-    // Constructor especial para XML
-    public Medicamento(int id, String codigo, String nombre, String tipoPresentacion) {
-        this.id = id;
-        this.codigo = codigo;
-        this.nombre = nombre;
-        this.tipoPresentacion = tipoPresentacion;
-
-        // sincroniza la secuencia con el ID leído
-        SEQ.updateAndGet(cur -> Math.max(cur, id + 1));
-    }
-
     public int getId() { return id; }
 
     public String getNombre() { return nombre;}
