@@ -4,7 +4,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Farmaceuta extends Usuario {
     private static final AtomicInteger SEQ = new AtomicInteger(1);
-    private final int id;
+    private int id;
+
+    public Farmaceuta() {}
 
     public Farmaceuta(String identificacion, String nombre, String clave) {
         super(identificacion, nombre, clave);
@@ -12,8 +14,9 @@ public class Farmaceuta extends Usuario {
     }
 
     @Override public int getId() { return id; }
+    @Override public void setId(int id) { this.id = id; }
 
-    public static void resetSequenceTo(int nextValue) {
+    public static void reiniciarSEQ(int nextValue) {
         SEQ.set(nextValue);
     }
 }

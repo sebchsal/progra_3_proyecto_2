@@ -38,12 +38,12 @@ public class MedicoDatos {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    medico = new Medico(
-                            rs.getString("identificacion"),
-                            rs.getString("nombre"),
-                            rs.getString("clave"),
-                            rs.getString("especialidad")
-                    );
+                    medico = new Medico();
+                    medico.setId(rs.getInt("id"));
+                    medico.setIdentificacion(rs.getString("identificacion"));
+                    medico.setNombre(rs.getString("nombre"));
+                    medico.setClave(rs.getString("clave"));
+                    medico.setEspecialidad(rs.getString("especialidad"));
                 }
             }
         }
@@ -59,12 +59,12 @@ public class MedicoDatos {
              ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {
-                Medico medico = new Medico(
-                        rs.getString("identificacion"),
-                        rs.getString("nombre"),
-                        rs.getString("clave"),
-                        rs.getString("especialidad")
-                );
+                Medico medico = new Medico();
+                medico.setId(rs.getInt("id"));
+                medico.setIdentificacion(rs.getString("identificacion"));
+                medico.setNombre(rs.getString("nombre"));
+                medico.setClave(rs.getString("clave"));
+                medico.setEspecialidad(rs.getString("especialidad"));
                 lista.add(medico);
             }
         }
@@ -72,17 +72,31 @@ public class MedicoDatos {
     }
 
     public Medico update(Medico medico) throws SQLException {
-        String sql = "UPDATE medico SET nombre=?, clave=?, especialidad=? WHERE identificacion=?";
+        String sql = "UPDATE medico SET identificacion=?, nombre=?, clave=?, especialidad=? WHERE id=? ";
         try (Connection cn = DB.getConnection();
              PreparedStatement ps = cn.prepareStatement(sql)) {
 
-            ps.setString(1, medico.getNombre());
-            ps.setString(2, medico.getIdentificacion());
+            ps.setString(1, medico.getIdentificacion());
+            ps.setString(2, medico.getNombre());
             ps.setString(3, medico.getClave());
             ps.setString(4, medico.getEspecialidad());
+            ps.setInt(5, medico.getId());
             ps.executeUpdate();
         }
         return medico;
+    }
+
+    public int obtenerUltimoId() throws SQLException {
+        String sql = "SELECT MAX(id) AS max_id FROM medico";
+        try (Connection conn = DB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt("max_id");
+            }
+            return 0; // si la tabla está vacía
+        }
     }
 
     public int delete(int id) throws SQLException {

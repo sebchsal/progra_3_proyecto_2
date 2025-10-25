@@ -11,14 +11,9 @@ public class Administrador extends Usuario {
         this.id = SEQ.getAndIncrement();
     }
 
-    public Administrador(int id, String nombreCompleto, String identificacion, String clave) {
-        super(identificacion, nombreCompleto, clave);
-        this.id = id;
-    }
-
    @Override public int getId() { return id; }
 
-    public static void resetSequenceTo(int nextValue) {
+    public static void reiniciarSEQ(int nextValue) {
         SEQ.set(nextValue);
     }
 }

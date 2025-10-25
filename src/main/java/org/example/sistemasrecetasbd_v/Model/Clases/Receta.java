@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Receta {
     private static final AtomicInteger SEQ = new AtomicInteger(1);
-    private final int id;
+    private int id;
     private String estado;
     private int cantidad;
     private String detalle;
@@ -13,6 +13,8 @@ public class Receta {
     private Paciente paciente;
     private LocalDate fechaConfeccion;
     private LocalDate fechaEntrega;
+
+    public Receta() {}
 
     public Receta(String estado, int cantidad, String detalle, Medicamento medicamento, Paciente paciente, LocalDate fechaC, LocalDate fechaE) {
         this.id = SEQ.getAndIncrement();
@@ -28,6 +30,7 @@ public class Receta {
     public int getId() {
         return id;
     }
+    public void setId(int id) {this.id = id;}
 
     public String getEstado() {return estado;}
     public void setEstado(String estado) {this.estado = estado;}
@@ -63,7 +66,7 @@ public class Receta {
     }
     public String getNombreMedicamento() {return medicamento.getNombre();}
 
-    public static void resetSequenceTo(int nextValue) {
+    public static void reiniciarSEQ(int nextValue) {
         SEQ.set(nextValue);
     }
 }

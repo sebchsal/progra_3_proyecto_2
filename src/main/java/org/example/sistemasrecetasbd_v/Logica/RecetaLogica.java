@@ -1,6 +1,8 @@
 package org.example.sistemasrecetasbd_v.Logica;
 
+import org.example.sistemasrecetasbd_v.Data.MedicamentoDatos;
 import org.example.sistemasrecetasbd_v.Data.RecetaDatos;
+import org.example.sistemasrecetasbd_v.Model.Clases.Medicamento;
 import org.example.sistemasrecetasbd_v.Model.Clases.Receta;
 
 import java.sql.SQLException;
@@ -34,6 +36,12 @@ public class RecetaLogica {
     public boolean delete(int id) throws SQLException {
         if (id <= 0) return false;
         return recetaDatos.delete(id) > 0;
+    }
+
+    public void reiniciarSecuencia() throws SQLException {
+        RecetaDatos datos = new RecetaDatos();
+        int ultimoId = datos.obtenerUltimoId();
+        Receta.reiniciarSEQ(ultimoId);
     }
 
     // --------- Helpers ---------

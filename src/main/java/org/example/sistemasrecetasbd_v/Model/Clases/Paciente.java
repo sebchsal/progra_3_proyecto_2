@@ -6,12 +6,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Paciente {
     private static final AtomicInteger SEQ = new AtomicInteger(1);
-    private final int id;
+    private int id;
     private String nombre;
     private String identificacion;
     private int edad;
     private LocalDate fechaNacimiento;
     private String telefono;
+
+    public Paciente() {}
 
     public Paciente(String identificacion, String nombre, LocalDate fechaNacimiento, String telefono) {
         this.id = SEQ.getAndIncrement();
@@ -36,6 +38,7 @@ public class Paciente {
     }
 
     public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
     public int getEdad() {
         return edad;
@@ -60,7 +63,7 @@ public class Paciente {
         this.telefono = telefono;
     }
 
-    public static void resetSequenceTo(int nextValue) {
+    public static void reiniciarSEQ(int nextValue) {
         SEQ.set(nextValue);
     }
 }

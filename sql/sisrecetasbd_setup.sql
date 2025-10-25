@@ -7,20 +7,17 @@ CREATE TABLE receta (
     cantidad INT NOT NULL,
     detalle VARCHAR(255),
 
-    -- Datos del medicamento
-    codigo_medicamento VARCHAR(50),
-    nombre_medicamento VARCHAR(100),
-    tipo_presentacion VARCHAR(100),
+    -- Relaciones foráneas
+    codigo_medicamento VARCHAR(50) NOT NULL,
+    identificacion_paciente VARCHAR(50) NOT NULL,
 
-    -- Datos del paciente
-    identificacion_paciente VARCHAR(50),
-    nombre_paciente VARCHAR(100),
-    fecha_nacimiento_paciente DATE,
-    telefono_paciente VARCHAR(50),
-
-    -- Fechas
     fecha_confeccion DATE NOT NULL,
-    fecha_entrega DATE
+    fecha_entrega DATE,
+
+    CONSTRAINT fk_receta_medicamento FOREIGN KEY (codigo_medicamento)
+        REFERENCES medicamento(codigo) ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT fk_receta_paciente FOREIGN KEY (identificacion_paciente)
+        REFERENCES paciente(identificacion) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
 

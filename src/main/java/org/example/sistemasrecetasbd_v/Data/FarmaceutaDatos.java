@@ -37,11 +37,11 @@ public class FarmaceutaDatos {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    farmaceuta = new Farmaceuta(
-                            rs.getString("identificacion"),
-                            rs.getString("nombre"),
-                            rs.getString("clave")
-                    );
+                    farmaceuta = new Farmaceuta(); // constructor vacío → no incrementa SEQ
+                    farmaceuta.setId(rs.getInt("id"));
+                    farmaceuta.setIdentificacion(rs.getString("identificacion"));
+                    farmaceuta.setNombre(rs.getString("nombre"));
+                    farmaceuta.setClave(rs.getString("clave"));
                 }
             }
         }
@@ -57,28 +57,42 @@ public class FarmaceutaDatos {
              ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {
-                Farmaceuta farmaceuta = new Farmaceuta(
-                        rs.getString("identificacion"),
-                        rs.getString("nombre"),
-                        rs.getString("clave")
-                );
-                lista.add(farmaceuta);
+                Farmaceuta f = new Farmaceuta(); // sin incrementar SEQ
+                f.setId(rs.getInt("id"));
+                f.setIdentificacion(rs.getString("identificacion"));
+                f.setNombre(rs.getString("nombre"));
+                f.setClave(rs.getString("clave"));
+                lista.add(f);
             }
         }
         return lista;
     }
 
     public Farmaceuta update(Farmaceuta farmaceuta) throws SQLException {
-        String sql = "UPDATE farmaceuta SET nombre=?, clave=? WHERE identificacion=?";
+        String sql = "UPDATE farmaceuta SET identificacion=?, nombre=?, clave=? WHERE id=?";
         try (Connection cn = DB.getConnection();
              PreparedStatement ps = cn.prepareStatement(sql)) {
 
-            ps.setString(1, farmaceuta.getNombre());
-            ps.setString(2, farmaceuta.getIdentificacion());
+            ps.setString(1, farmaceuta.getIdentificacion());
+            ps.setString(2, farmaceuta.getNombre());
             ps.setString(3, farmaceuta.getClave());
+            ps.setInt(4, farmaceuta.getId());
             ps.executeUpdate();
         }
         return farmaceuta;
+    }
+
+    public int obtenerUltimoId() throws SQLException {
+        String sql = "SELECT MAX(id) AS max_id FROM farmaceuta";
+        try (Connection conn = DB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt("max_id");
+            }
+            return 0; // si la tabla está vacía
+        }
     }
 
     public int delete(int id) throws SQLException {

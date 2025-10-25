@@ -36,6 +36,12 @@ public class MedicoLogica {
         return medicoDatos.delete(id) > 0;
     }
 
+    public void reiniciarSecuencia() throws SQLException {
+        MedicoDatos datos = new MedicoDatos();
+        int ultimoId = datos.obtenerUltimoId();
+        Medico.reiniciarSEQ(ultimoId);
+    }
+
     // --------- Helpers ---------
 
     private void validarNuevo(Medico m) {

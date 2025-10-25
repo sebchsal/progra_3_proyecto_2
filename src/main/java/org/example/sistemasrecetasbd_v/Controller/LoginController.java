@@ -12,10 +12,13 @@ import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import org.example.sistemasrecetasbd_v.Logica.*;
 import org.example.sistemasrecetasbd_v.Model.Clases.Farmaceuta;
 import org.example.sistemasrecetasbd_v.Model.Listas.*;
 import org.example.sistemasrecetasbd_v.Model.Clases.Administrador;
 import org.example.sistemasrecetasbd_v.Model.Clases.Medico;
+
+import java.sql.SQLException;
 
 public class LoginController {
 
@@ -71,6 +74,7 @@ public class LoginController {
                 if (claveGuardada.equals(pass)) {
                     currentUserType = "admin";
                     currentUser = admin;
+                    sincronizarSecuencias();//Sincronizar secuencias de id
                     loadInicioScreen();
                     return;
                 }
@@ -82,6 +86,7 @@ public class LoginController {
                     if (claveGuardada.equals(pass)) {
                         currentUserType = "medico";
                         currentUser = medico;
+                        sincronizarSecuencias();//Sincronizar secuencias de id
                         loadInicioScreen();
                         return;
                     }
@@ -94,6 +99,7 @@ public class LoginController {
                     if (claveGuardada.equals(pass)) {
                         currentUserType = "farmacéuta";
                         currentUser = farma;
+                        sincronizarSecuencias();//Sincronizar secuencias de id
                         loadInicioScreen();
                         return;
                     }
@@ -160,6 +166,27 @@ public class LoginController {
                 }
             });
         }).start();
+    }
+
+    private void sincronizarSecuencias() {
+        try {
+            MedicoLogica logicaMedico = new MedicoLogica();
+            PacienteLogica logicaPaciente = new PacienteLogica();
+            RecetaLogica logicaReceta = new RecetaLogica();
+            MedicamentoLogica logicaMedicamento = new MedicamentoLogica();
+            FarmaceutaLogica logicaFarma = new FarmaceutaLogica();
+
+            logicaMedico.reiniciarSecuencia();
+            logicaPaciente.reiniciarSecuencia();
+            logicaReceta.reiniciarSecuencia();
+            logicaMedicamento.reiniciarSecuencia();
+            logicaFarma.reiniciarSecuencia();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            new Alert(Alert.AlertType.WARNING,
+                    "No se pudieron sincronizar los contadores de ID con la base de datos.\n" + e.getMessage()
+            ).showAndWait();
+        }
     }
 
     // Deja en "blanco" el tipo de usuario al cerrar sesion

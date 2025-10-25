@@ -36,11 +36,11 @@ public class MedicamentoDatos {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    medicamento = new Medicamento(
-                            rs.getString("codigo"),
-                            rs.getString("nombre"),
-                            rs.getString("tipo_presentacion")
-                    );
+                    medicamento = new Medicamento();
+                    medicamento.setId(rs.getInt("id"));
+                    medicamento.setCodigo(rs.getString("codigo"));
+                    medicamento.setNombre(rs.getString("nombre"));
+                    medicamento.setTipoPresentacion(rs.getString("tipo_presentacion"));
                 }
             }
         }
@@ -55,11 +55,11 @@ public class MedicamentoDatos {
              ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {
-                Medicamento medicamento = new Medicamento(
-                        rs.getString("codigo"),
-                        rs.getString("nombre"),
-                        rs.getString("tipo_presentacion")
-                );
+                Medicamento medicamento = new Medicamento();
+                medicamento.setId(rs.getInt("id"));
+                medicamento.setCodigo(rs.getString("codigo"));
+                medicamento.setNombre(rs.getString("nombre"));
+                medicamento.setTipoPresentacion(rs.getString("tipo_presentacion"));
                 lista.add(medicamento);
             }
         }
@@ -67,16 +67,30 @@ public class MedicamentoDatos {
     }
 
     public Medicamento update(Medicamento medicamento) throws SQLException {
-        String sql = "UPDATE medicamento SET nombre=?, tipo_presentacion=? WHERE codigo=?";
+        String sql = "UPDATE medicamento SET nombre=?, tipo_presentacion=?, codigo=? WHERE id=?";
         try (Connection cn = DB.getConnection();
              PreparedStatement ps = cn.prepareStatement(sql)) {
 
             ps.setString(1, medicamento.getNombre());
             ps.setString(2, medicamento.getTipoPresentacion());
             ps.setString(3, medicamento.getCodigo());
+            ps.setInt(4, medicamento.getId());
             ps.executeUpdate();
         }
         return medicamento;
+    }
+
+    public int obtenerUltimoId() throws SQLException {
+        String sql = "SELECT MAX(id) AS max_id FROM medicamento";
+        try (Connection conn = DB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt("max_id");
+            }
+            return 0; // si la tabla está vacía
+        }
     }
 
     public int delete(int id) throws SQLException {

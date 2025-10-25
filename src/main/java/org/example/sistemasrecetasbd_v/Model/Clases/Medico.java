@@ -4,8 +4,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Medico extends  Usuario {
     private static final AtomicInteger SEQ = new AtomicInteger(1); // ID por clase Medico
-    private final int id;
+    private int id;
     private String especialidad;
+
+    public Medico(){}
 
     public Medico(String identificacion, String nombre, String clave, String especialidad) {
         super(identificacion, nombre, clave);
@@ -14,11 +16,12 @@ public class Medico extends  Usuario {
     }
 
     @Override public int getId() { return id; }
+    @Override public void setId(int id) { this.id = id; }
 
     public String getEspecialidad() { return especialidad; }
     public void setEspecialidad(String especialidad) { this.especialidad = especialidad; }
 
-    public static void resetSequenceTo(int nextValue) {
+    public static void reiniciarSEQ(int nextValue) {
         SEQ.set(nextValue);
     }
 }

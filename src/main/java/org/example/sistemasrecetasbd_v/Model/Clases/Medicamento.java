@@ -4,10 +4,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Medicamento {
     private static final AtomicInteger SEQ = new AtomicInteger(1);
-    private final int id;
+    private int id;
     private String codigo;
     private String nombre;
     private String tipoPresentacion;
+
+    public Medicamento() {}
 
     public Medicamento(String codigo, String nombre, String tipoPresentacion) {
         this.id = SEQ.getAndIncrement();
@@ -17,6 +19,7 @@ public class Medicamento {
     }
 
     public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
     public String getNombre() { return nombre;}
     public void setNombre(String nombre) { this.nombre = nombre;}
@@ -27,7 +30,7 @@ public class Medicamento {
     public String getCodigo() { return codigo;}
     public void setCodigo(String codigo) { this.codigo = codigo;}
 
-    public static void resetSequenceTo(int nextValue) {
+    public static void reiniciarSEQ(int nextValue) {
         SEQ.set(nextValue);
     }
 }

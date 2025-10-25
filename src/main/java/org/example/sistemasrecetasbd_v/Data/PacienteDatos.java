@@ -40,13 +40,16 @@ public class PacienteDatos {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    paciente = new Paciente(
-                            rs.getString("identificacion"),
-                            rs.getString("nombre"),
-                            rs.getDate("fecha_nacimiento") != null ?
-                                    rs.getDate("fecha_nacimiento").toLocalDate() : null,
-                            rs.getString("telefono")
+                    paciente = new Paciente();
+                    paciente.setId(rs.getInt("id"));
+                    paciente.setIdentificacion(rs.getString("identificacion"));
+                    paciente.setNombre(rs.getString("nombre"));
+                    paciente.setFechaNacimiento(
+                            rs.getDate("fecha_nacimiento") != null
+                                    ? rs.getDate("fecha_nacimiento").toLocalDate()
+                                    : null
                     );
+                    paciente.setTelefono(rs.getString("telefono"));
                 }
             }
         }
@@ -62,21 +65,24 @@ public class PacienteDatos {
              ResultSet rs = st.executeQuery(sql)) {
 
             while (rs.next()) {
-                Paciente paciente = new Paciente(
-                        rs.getString("identificacion"),
-                        rs.getString("nombre"),
-                        rs.getDate("fecha_nacimiento") != null ?
-                                rs.getDate("fecha_nacimiento").toLocalDate() : null,
-                        rs.getString("telefono")
+                Paciente p = new Paciente();
+                p.setId(rs.getInt("id"));
+                p.setIdentificacion(rs.getString("identificacion"));
+                p.setNombre(rs.getString("nombre"));
+                p.setFechaNacimiento(
+                        rs.getDate("fecha_nacimiento") != null
+                                ? rs.getDate("fecha_nacimiento").toLocalDate()
+                                : null
                 );
-                lista.add(paciente);
+                p.setTelefono(rs.getString("telefono"));
+                lista.add(p);
             }
         }
         return lista;
     }
 
     public Paciente update(Paciente paciente) throws SQLException {
-        String sql = "UPDATE paciente SET nombre=?, fecha_nacimiento=?, telefono=? WHERE identificacion=?";
+        String sql = "UPDATE paciente SET nombre=?, fecha_nacimiento=?, telefono=?, identificacion=? WHERE id=?";
         try (Connection cn = DB.getConnection();
              PreparedStatement ps = cn.prepareStatement(sql)) {
 
@@ -87,9 +93,23 @@ public class PacienteDatos {
                 ps.setNull(2, Types.DATE);
             ps.setString(3, paciente.getTelefono());
             ps.setString(4, paciente.getIdentificacion());
+            ps.setInt(5, paciente.getId());
             ps.executeUpdate();
         }
         return paciente;
+    }
+
+    public int obtenerUltimoId() throws SQLException {
+        String sql = "SELECT MAX(id) AS max_id FROM paciente";
+        try (Connection conn = DB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getInt("max_id");
+            }
+            return 0; // si la tabla está vacía
+        }
     }
 
     public int delete(int id) throws SQLException {

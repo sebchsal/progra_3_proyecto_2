@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class Usuario {
     private static final AtomicInteger SEQ = new AtomicInteger(1); // secuencia por clase base
-    private final int id;                 // inmutable tras crear
+    private int id;                 // inmutable tras crear
     private String nombre;
     private String clave;
     private String identificacion;
@@ -16,7 +16,11 @@ public abstract class Usuario {
         this.clave = clave;
     }
 
+    public Usuario() {
+    }
+
     public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
