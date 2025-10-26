@@ -47,7 +47,7 @@ public class AgregarPacienteController {
             }
 
             if (!modoEdicion) {
-                // ✅ NO agregar a la lista aquí, solo crear el objeto y devolverlo
+                // NO agregar a la lista aquí, solo crear el objeto y devolverlo
                 paciente = new Paciente(identificacion, nombre, fechaNac, telefono);
             } else {
                 paciente.setIdentificacion(identificacion);

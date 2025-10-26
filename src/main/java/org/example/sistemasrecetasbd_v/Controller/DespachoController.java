@@ -151,11 +151,28 @@ public class DespachoController {
             if (det != null) seleccionada.setDetalle(det.trim());
             // Persistir/actualizar en HistoricoRecetas
             actualizarEnHistoricoSinDuplicar(historicoRecetas, seleccionada);
-            // Reflejar en UI local
-            recetaLogica.update(seleccionada);
-            txtEstadoReceta.setText(nuevoEstado);
-            tblReceta.refresh();
-            volverAInicio();
+
+            Async.run(() -> {
+                try {
+                    // Se ejecuta fuera del hilo de interfaz
+                    return recetaLogica.update(seleccionada);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }, actualizada -> {
+                // Se ejecuta en el hilo de interfaz
+                if (actualizada != null) {
+                    txtEstadoReceta.setText(nuevoEstado);
+                    tblReceta.refresh();
+                    volverAInicio();
+                    mostrarAlerta("Éxito", "Receta actualizada correctamente.");
+                } else {
+                    mostrarAlerta("Error", "No se pudo actualizar la receta.");
+                }
+            }, ex -> {
+                mostrarAlerta("Error al guardar los cambios", ex.getMessage());
+            });
+
         } catch (Exception ex) {
             mostrarAlerta("No se pudo guardar: ", ex.getMessage());
             ex.printStackTrace();

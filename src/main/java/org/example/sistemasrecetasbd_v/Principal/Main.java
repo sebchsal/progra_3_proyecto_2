@@ -16,4 +16,10 @@ public class Main extends Application {
         stage.setScene(scene);
         stage.show();
     }
+
+    @Override
+    public void stop() {
+        org.example.sistemasrecetasbd_v.Controller.Async.shutdown();
+    }
+
 }

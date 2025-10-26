@@ -184,34 +184,70 @@ public class InicioController implements Initializable {
         tblMedicamentosDashboard.setItems(observableMedicamentosDashboard);
     }
 
-    private void updateTables() throws SQLException {
-        if (listaMedicos != null) {
-            listaMedicos.setAll(medicoLogica.findAll());
+    private void updateTables() {
+
+        Async.run(() -> {
+            try {
+                return medicoLogica.findAll();
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }, lista -> {
+            listaMedicos.setAll(lista);
             observableMedicos.setAll(listaMedicos.getItems());
-        }
-        if (listaFarmaceutas != null) {
-            listaFarmaceutas.setAll(farmaceutaLogica.findAll());
+        }, ex -> mostrarAlerta("Error al cargar médicos", ex.getMessage()));
+
+        Async.run(() -> {
+            try {
+                return farmaceutaLogica.findAll();
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }, lista -> {
+            listaFarmaceutas.setAll(lista);
             observableFarmaceutas.setAll(listaFarmaceutas.getItems());
-        }
-        if (listaPacientes != null) {
-            listaPacientes.setAll(pacienteLogica.findAll());
+        }, ex -> mostrarAlerta("Error al cargar farmaceutas", ex.getMessage()));
+
+        Async.run(() -> {
+            try {
+                return pacienteLogica.findAll();
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }, lista -> {
+            listaPacientes.setAll(lista);
             observablePacientes.setAll(listaPacientes.getItems());
-        }
-        if (catalogoMedicamentos != null) {
-            catalogoMedicamentos.setAll(medicamentoLogica.findAll());
+        }, ex -> mostrarAlerta("Error al cargar pacientes", ex.getMessage()));
+
+        Async.run(() -> {
+            try {
+                return medicamentoLogica.findAll();
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }, lista -> {
+            catalogoMedicamentos.setAll(lista);
             observableMedicamentos.setAll(catalogoMedicamentos.getItems());
-        }
-        if (historicoRecetas != null) {
-            historicoRecetas.setAll(recetaLogica.findAll());
+            observableMedicamentosDashboard.setAll(catalogoMedicamentos.getItems());
+        }, ex -> mostrarAlerta("Error al cargar medicamentos", ex.getMessage()));
+
+        Async.run(() -> {
+            try {
+                return recetaLogica.findAll();
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }, lista -> {
+            historicoRecetas.setAll(lista);
             observableHistoricoRecetas.setAll(historicoRecetas.getItems());
             cargarGraficoRecetas();
             cargarGraficoMedicamentos();
-        }
-        if (catalogoMedicamentos != null) {
-            catalogoMedicamentos.setAll(medicamentoLogica.findAll());
-            observableMedicamentos.setAll(catalogoMedicamentos.getItems());
-            observableMedicamentosDashboard.setAll(catalogoMedicamentos.getItems());
-        }
+        }, ex -> mostrarAlerta("Error al cargar recetas", ex.getMessage()));
     }
 
     private void setupPermissions() {

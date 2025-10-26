@@ -255,19 +255,33 @@ public class PrescripcionController {
                 return;
             }
             Receta nueva = new Receta("confeccionada", cantidad, detalle, medicamentoSeleccionado, pacienteSeleccionado, confe, entre);
-            // 1) persistir primero en BD
-            Receta persistida = recetaLogica.insert(nueva);
-            if (persistida == null) {
-                mostrarAlerta("Error", "No se pudo guardar la receta en la base de datos.");
-                return;
-            }
-            // 2) luego reflejar en histórico/UI
-            historicoRecetas.agregarOReemplazar(persistida);
-            spnCantidadPrescripcion.getValueFactory().setValue(1);
-            txtAreaDetallesPrescripcion.clear();
-            Stage stage = (Stage) txtduracionReceta.getScene().getWindow();
-            stage.close();
-        } catch (Exception e){
+
+            Async.run(() -> {
+                try {
+                    // Se ejecuta en segundo plano
+                    return recetaLogica.insert(nueva);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            }, persistida -> {
+                // Se ejecuta en el hilo de la UI
+                if (persistida == null) {
+                    mostrarAlerta("Error", "No se pudo guardar la receta en la base de datos.");
+                    return;
+                }
+                historicoRecetas.agregarOReemplazar(persistida);
+                spnCantidadPrescripcion.getValueFactory().setValue(1);
+                txtAreaDetallesPrescripcion.clear();
+
+                Stage stage = (Stage) txtduracionReceta.getScene().getWindow();
+                stage.close();
+
+                mostrarAlerta("Éxito", "Receta guardada correctamente.");
+            }, ex -> {
+                mostrarAlerta("Error al guardar la receta", ex.getMessage());
+            });
+
+        } catch (Exception e) {
             mostrarAlerta("Error", e.getMessage());
         }
     }
