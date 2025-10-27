@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+
+<AnchorPane prefHeight="586.0" prefWidth="634.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.sistemasrecetasbd_v.ChatSistemaRecetas">
+   <children>
+      <ImageView fitHeight="46.0" fitWidth="124.0" layoutX="32.0" layoutY="15.0" pickOnBounds="true" preserveRatio="true">
+         <image>
+            <Image url="@../../../Imagenes/LogoHospital.png" />
+         </image>
+      </ImageView>
+      <Label layoutX="206.0" layoutY="26.0" text="Chat del hospital">
+         <font>
+            <Font name="Perpetua Titling MT Bold" size="20.0" />
+         </font>
+      </Label>
+      <Label layoutX="54.0" layoutY="72.0" text="Conéctese al sistema y comienza a enviar mensajes al personal médico y  farmaceutico del hospital." />
+      <Label layoutX="32.0" layoutY="108.0" text="Configuracion de usuario ">
+         <font>
+            <Font name="Lucida Fax Italic" size="12.0" />
+         </font>
+      </Label>
+      <Separator layoutX="197.0" layoutY="114.0" prefHeight="2.0" prefWidth="437.0" />
+      <Separator layoutX="2.0" layoutY="113.0" prefHeight="3.0" prefWidth="25.0" />
+      <TextField id="txtNombreCompletoChat" fx:id="txtNombreCompletoChat" layoutX="27.0" layoutY="132.0" prefHeight="25.0" prefWidth="328.0" promptText="Nombre completo" />
+      <Button id="btnConectarChat" fx:id="btnConectarChat" layoutX="364.0" layoutY="132.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="83.0" text="Conectar" />
+      <Separator layoutX="2.0" layoutY="173.0" prefHeight="25.0" prefWidth="25.0" />
+      <Label layoutX="32.0" layoutY="178.0" text="Mensajes">
+         <font>
+            <Font name="Lucida Fax Italic" size="12.0" />
+         </font>
+      </Label>
+      <Separator layoutX="104.0" layoutY="184.0" prefHeight="3.0" prefWidth="526.0" />
+      <TextArea id="txtAreaMensajesChat" fx:id="txtAreaMensajesChat" layoutX="32.0" layoutY="198.0" prefHeight="324.0" prefWidth="574.0" />
+      <TextField id="txtEscribirMensajeChat" fx:id="txtEscribirMensajeChat" layoutX="31.0" layoutY="534.0" prefHeight="25.0" prefWidth="486.0" promptText="Escriba su mensaje" />
+      <Button id="btnEnviarChat" fx:id="btnEnviarChat" layoutX="523.0" layoutY="534.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="83.0" text="Enviar" />
+   </children>
+</AnchorPane>
