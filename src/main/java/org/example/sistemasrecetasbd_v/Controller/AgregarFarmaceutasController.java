@@ -1,13 +1,17 @@
 package org.example.sistemasrecetasbd_v.Controller;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
+import org.example.sistemasrecetasbd_v.Logica.FarmaceutaLogica;
 import org.example.sistemasrecetasbd_v.Model.Clases.Farmaceuta;
 
 public class AgregarFarmaceutasController {
     @FXML private TextField txtIdentificacionAgregarFarmaceuta, txtNombreAgregarFarmaceuta;
+    @FXML private Button btnRegistrarFarmaceuta;
+
     private Farmaceuta farmaceuta;
     private boolean modoEdicion = false;
 
@@ -37,9 +41,7 @@ public class AgregarFarmaceutasController {
                 farmaceuta.setNombre(nombre);
             }
 
-            Stage stage = (Stage) txtNombreAgregarFarmaceuta.getScene().getWindow();
-            stage.setUserData(farmaceuta);
-            stage.close();
+           guardarFarmaceutaAsync(farmaceuta);
         }catch(Exception e){
             mostrarAlerta("Error al guardar los datos", e.getMessage());
 
@@ -64,5 +66,38 @@ public class AgregarFarmaceutasController {
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
         alert.showAndWait();
+    }
+
+
+    private void guardarFarmaceutaAsync(Farmaceuta f) {
+        if (btnRegistrarFarmaceuta != null) btnRegistrarFarmaceuta.setDisable(true);
+
+        Async.run(
+                () -> {
+                    try {
+                        FarmaceutaLogica logica = new FarmaceutaLogica();
+                        if (modoEdicion) {
+                            return logica.update(f);
+                        } else {
+                            int nuevoId = logica.insert(f).getId();
+                            f.setId(nuevoId);
+                            return f;
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                guardado -> {
+                    if (btnRegistrarFarmaceuta != null) btnRegistrarFarmaceuta.setDisable(false);
+                    new Alert(Alert.AlertType.INFORMATION,
+                            (modoEdicion ? "Farmaceuta actualizado (ID: " : "Farmaceuta guardado (ID: ")
+                                    + guardado.getId() + ")").showAndWait();
+                    ((Stage) txtNombreAgregarFarmaceuta.getScene().getWindow()).close();
+                },
+                ex -> {
+                    if (btnRegistrarFarmaceuta != null) btnRegistrarFarmaceuta.setDisable(false);
+                    new Alert(Alert.AlertType.ERROR, "No se pudo guardar: " + ex.getMessage()).showAndWait();
+                }
+        );
     }
 }

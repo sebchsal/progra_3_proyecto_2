@@ -6,6 +6,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
+import org.example.sistemasrecetasbd_v.Logica.MedicoLogica;
 import org.example.sistemasrecetasbd_v.Model.Clases.Medico;
 
 public class AgregarMedicosController {
@@ -52,9 +53,8 @@ public class AgregarMedicosController {
                 medico.setEspecialidad(especialidad);
                 medico.setClave(identificacion);
             }
-            Stage stage = (Stage) txtNombreAgregarMedico.getScene().getWindow();
-            stage.setUserData(medico);
-            stage.close();
+            guardarMedicoAsync(medico);
+
         } catch (Exception e) {
             mostrarAlerta("Error", e.getMessage());
         }
@@ -79,5 +79,39 @@ public class AgregarMedicosController {
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
         alert.showAndWait();
+    }
+
+    private void guardarMedicoAsync(Medico m) {
+        btnRegistrarMedico.setDisable(true);
+
+        Async.run(
+                () -> {
+                    try {
+                        MedicoLogica logica = new MedicoLogica();
+                        if (modoEdicion) {
+                            return logica.update(m);
+                        } else {
+                            int nuevoId = logica.insert(m).getId();
+                            m.setId(nuevoId);
+                            return m;
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                guardado -> {
+                    btnRegistrarMedico.setDisable(false);
+
+                    new Alert(Alert.AlertType.INFORMATION,
+                            (modoEdicion ? "Médico actualizado (ID: " : "Médico guardado (ID: ")
+                                    + guardado.getId() + ")").showAndWait();
+
+                    ((Stage) txtNombreAgregarMedico.getScene().getWindow()).close();
+                },
+                ex -> {
+                    btnRegistrarMedico.setDisable(false);
+                    new Alert(Alert.AlertType.ERROR, "No se pudo guardar: " + ex.getMessage()).showAndWait();
+                }
+        );
     }
 }

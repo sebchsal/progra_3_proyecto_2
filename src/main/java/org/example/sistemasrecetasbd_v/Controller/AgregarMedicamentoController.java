@@ -2,12 +2,15 @@ package org.example.sistemasrecetasbd_v.Controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import org.example.sistemasrecetasbd_v.Logica.MedicamentoLogica;
 import org.example.sistemasrecetasbd_v.Model.Clases.Medicamento;
 
 public class AgregarMedicamentoController {
     @FXML private TextField txtCodigoAgregarMedicamento, txtNombreAgregarMedicamento, txtPresentacionAgregarMedicamento;
+    @FXML private Button btnRegistrarMedicamento;
 
     private Medicamento medicamento;
     private boolean modoEdicion = false;
@@ -41,9 +44,7 @@ public class AgregarMedicamentoController {
                 medicamento.setTipoPresentacion(presentacion);
             }
 
-            Stage stage = (Stage) txtNombreAgregarMedicamento.getScene().getWindow();
-            stage.setUserData(medicamento);
-            stage.close();
+            guardarMedicamentoAsync(medicamento);
         } catch (Exception e) {
             mostrarAlerta("Error", e.getMessage());
         }
@@ -67,5 +68,37 @@ public class AgregarMedicamentoController {
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
         alert.showAndWait();
+    }
+
+    private void guardarMedicamentoAsync(Medicamento m) {
+        if (btnRegistrarMedicamento != null) btnRegistrarMedicamento.setDisable(true);
+
+        Async.run(
+                () -> {
+                    try {
+                        MedicamentoLogica logica = new MedicamentoLogica();
+                        if (modoEdicion) {
+                            return logica.update(m);
+                        } else {
+                            int nuevoId = logica.insert(m).getId();
+                            m.setId(nuevoId);
+                            return m;
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                guardado -> {
+                    if (btnRegistrarMedicamento != null) btnRegistrarMedicamento.setDisable(false);
+                    new Alert(Alert.AlertType.INFORMATION,
+                            (modoEdicion ? "Medicamento actualizado (ID: " : "Medicamento guardado (ID: ")
+                                    + guardado.getId() + ")").showAndWait();
+                    ((Stage) txtNombreAgregarMedicamento.getScene().getWindow()).close();
+                },
+                ex -> {
+                    if (btnRegistrarMedicamento != null) btnRegistrarMedicamento.setDisable(false);
+                    new Alert(Alert.AlertType.ERROR, "No se pudo guardar: " + ex.getMessage()).showAndWait();
+                }
+        );
     }
 }

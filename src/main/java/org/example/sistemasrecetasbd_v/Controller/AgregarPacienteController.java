@@ -3,6 +3,7 @@ package org.example.sistemasrecetasbd_v.Controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import org.example.sistemasrecetasbd_v.Logica.PacienteLogica;
 import org.example.sistemasrecetasbd_v.Model.Clases.Paciente;
 
 import java.time.LocalDate;
@@ -55,9 +56,7 @@ public class AgregarPacienteController {
                 paciente.setFechaNacimiento(fechaNac);
                 paciente.setTelefono(telefono);
             }
-            Stage stage = (Stage) txtNombreAgregarPaciente.getScene().getWindow();
-            stage.setUserData(paciente);
-            stage.close();
+            guardarPacienteAsync(paciente);
         } catch (Exception e) {
             mostrarAlerta("Error", e.getMessage());
         }
@@ -76,5 +75,37 @@ public class AgregarPacienteController {
         alert.setHeaderText(null);
         alert.setContentText(mensaje);
         alert.showAndWait();
+    }
+
+    private void guardarPacienteAsync(Paciente p) {
+        btnRegistrarPaciente.setDisable(true);
+
+        Async.run(
+                () -> {
+                    try {
+                        PacienteLogica logica = new PacienteLogica();
+                        if (modoEdicion) {
+                            return logica.update(p);
+                        } else {
+                            int nuevoId = logica.insert(p).getId();
+                            p.setId(nuevoId);
+                            return p;
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                guardado -> {
+                    btnRegistrarPaciente.setDisable(false);
+                    new Alert(Alert.AlertType.INFORMATION,
+                            (modoEdicion ? "Paciente actualizado (ID: " : "Paciente guardado (ID: ")
+                                    + guardado.getId() + ")").showAndWait();
+                    ((Stage) txtNombreAgregarPaciente.getScene().getWindow()).close();
+                },
+                ex -> {
+                    btnRegistrarPaciente.setDisable(false);
+                    new Alert(Alert.AlertType.ERROR, "No se pudo guardar: " + ex.getMessage()).showAndWait();
+                }
+        );
     }
 }
