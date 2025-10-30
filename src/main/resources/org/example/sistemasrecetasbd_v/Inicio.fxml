@@ -7,6 +7,7 @@
 <?import javafx.scene.chart.PieChart?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
@@ -61,6 +62,7 @@
                         <Button id="btnAgregarMedicos" fx:id="btnAgregarMedicos" layoutX="527.0" layoutY="120.0" mnemonicParsing="false" onAction="#agregarMedico" prefHeight="25.0" prefWidth="105.0" text="Agregar" />
                         <Button id="btnModificarMedicos" fx:id="btnModificarMedicos" layoutX="527.0" layoutY="180.0" mnemonicParsing="false" onAction="#modificarMedico" prefHeight="25.0" prefWidth="105.0" text="Modificar" />
                         <Button id="btnEliminarMedicos" fx:id="btnEliminarMedicos" layoutX="527.0" layoutY="240.0" mnemonicParsing="false" onAction="#eliminarMedico" prefHeight="25.0" prefWidth="107.0" text="Eliminar" />
+                        <ProgressIndicator id="progMedtab" fx:id="progMedtab" layoutX="458.0" layoutY="13.0" prefHeight="25.0" prefWidth="28.0" visible="false" />
                      </children></AnchorPane>
             </content>
           </Tab>
@@ -83,6 +85,7 @@
                             <Button id="btnAgregarFarmaceutas" fx:id="btnAgregarFarmaceutas" layoutX="527.0" layoutY="120.0" mnemonicParsing="false" onAction="#agregarFarmaceuta" prefHeight="25.0" prefWidth="105.0" text="Agregar" />
                             <Button id="btnModificarFarmaceutas" fx:id="btnModificarFarmaceutas" layoutX="527.0" layoutY="180.0" mnemonicParsing="false" onAction="#modificarFarmaceuta" prefHeight="25.0" prefWidth="105.0" text="Modificar" />
                             <Button id="btnEliminarFarmaceutas" fx:id="btnEliminarFarmaceutas" layoutX="527.0" layoutY="240.0" mnemonicParsing="false" onAction="#eliminarFarmaceuta" prefHeight="25.0" prefWidth="107.0" text="Eliminar" />
+                        <ProgressIndicator id="progFarmtab" fx:id="progFarmtab" layoutX="457.0" layoutY="13.0" prefHeight="25.0" prefWidth="28.0" visible="false" />
                         </children></AnchorPane>
                 </content>
             </Tab>
@@ -107,6 +110,7 @@
                             <Button id="btnAgregarPacientes" fx:id="btnAgregarPacientes" layoutX="527.0" layoutY="120.0" mnemonicParsing="false" onAction="#agregarPaciente" prefHeight="25.0" prefWidth="105.0" text="Agregar" />
                             <Button id="btnModificarPacientes" fx:id="btnModificarPacientes" layoutX="527.0" layoutY="180.0" mnemonicParsing="false" onAction="#modificarPaciente" prefHeight="25.0" prefWidth="105.0" text="Modificar" />
                             <Button id="btnEliminarPacientes" fx:id="btnEliminarPacientes" layoutX="527.0" layoutY="240.0" mnemonicParsing="false" onAction="#eliminarPaciente" prefHeight="25.0" prefWidth="107.0" text="Eliminar" />
+                        <ProgressIndicator id="progPactab" fx:id="progPactab" layoutX="456.0" layoutY="13.0" prefHeight="25.0" prefWidth="28.0" visible="false" />
                         </children></AnchorPane>
                 </content>
             </Tab>
@@ -126,11 +130,10 @@
                               <Cursor fx:constant="TEXT" />
                            </cursor></TextField>
                             <Button id="btnBuscarMedicamentos" fx:id="btnBuscarMedicamentos" layoutX="343.0" layoutY="13.0" mnemonicParsing="false" onAction="#buscarMedicamento" prefHeight="25.0" prefWidth="107.0" text="Buscar" />
-                        <Button id="btnAgregarMedicamentos" fx:id="btnAgregarMedicamentos" layoutX="527.0" layoutY="240.0" mnemonicParsing="false" onAction="#agregarMedicamento" prefHeight="25.0" prefWidth="105.0" text="Agregar" />
-                        <Button id="btnModificarMedicamentos" fx:id="btnModificarMedicamentos" layoutX="527.0" layoutY="300.0" mnemonicParsing="false" onAction="#modificarMedicamento" prefHeight="25.0" prefWidth="105.0" text="Modificar" />
-                        <Button id="btnEliminarMedicamentos" fx:id="btnEliminarMedicamentos" layoutX="527.0" layoutY="360.0" mnemonicParsing="false" onAction="#eliminarMedicamento" prefHeight="25.0" prefWidth="105.0" text="Eliminar" />
-                        <Button id="btnPrescripcion" fx:id="btnPrescripcion" layoutX="527.0" layoutY="87.0" mnemonicParsing="false" onAction="#abrirPrescripcion" prefHeight="25.0" prefWidth="105.0" text="Prescripción" />
-                        <Button id="btnDespacho" fx:id="btnDespacho" layoutX="527.0" layoutY="147.0" mnemonicParsing="false" onAction="#abrirDespacho" prefHeight="25.0" prefWidth="105.0" text="Despacho" />
+                        <ProgressIndicator id="progMedctab" fx:id="progMedctab" layoutX="456.0" layoutY="13.0" prefHeight="25.0" prefWidth="28.0" visible="false" />
+                        <Button id="btnAgregarMedicamentos" fx:id="btnAgregarMedicamentos" layoutX="529.0" layoutY="110.0" mnemonicParsing="false" onAction="#agregarMedicamento" prefHeight="25.0" prefWidth="105.0" text="Agregar" />
+                        <Button id="btnModificarMedicamentos" fx:id="btnModificarMedicamentos" layoutX="529.0" layoutY="170.0" mnemonicParsing="false" onAction="#modificarMedicamento" prefHeight="25.0" prefWidth="105.0" text="Modificar" />
+                        <Button id="btnEliminarMedicamentos" fx:id="btnEliminarMedicamentos" layoutX="529.0" layoutY="230.0" mnemonicParsing="false" onAction="#eliminarMedicamento" prefHeight="25.0" prefWidth="107.0" text="Eliminar" />
                         </children></AnchorPane>
                 </content>
             </Tab>
@@ -218,6 +221,9 @@
                            </cursor></TextField>
                             <Button id="btnBuscarHistorial" fx:id="btnBuscarHistorial" layoutX="343.0" layoutY="13.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="107.0" text="Buscar" />
                             <Button id="btnDetallesHistorial" fx:id="btnDetallesHistorial" layoutX="527.0" layoutY="211.0" mnemonicParsing="false" onAction="#mostrarDetallesReceta" prefHeight="25.0" prefWidth="105.0" text="Mostrar Detalles" />
+                        <ProgressIndicator id="progRecetatab" fx:id="progRecetatab" layoutX="456.0" layoutY="13.0" prefHeight="25.0" prefWidth="28.0" visible="false" />
+                        <Button id="btnPrescripcion" fx:id="btnPrescripcion" layoutX="527.0" layoutY="92.0" mnemonicParsing="false" onAction="#abrirPrescripcion" prefHeight="25.0" prefWidth="105.0" text="Prescripción" />
+                        <Button id="btnDespacho" fx:id="btnDespacho" layoutX="527.0" layoutY="149.0" mnemonicParsing="false" onAction="#abrirDespacho" prefHeight="25.0" prefWidth="105.0" text="Despacho" />
 
                         </children></AnchorPane>
                 </content>

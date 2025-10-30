@@ -3,6 +3,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
@@ -48,5 +49,6 @@
         </GridPane>
         <Button id="btnRegistrarPaciente" fx:id="btnRegistrarPaciente" layoutX="78.0" layoutY="281.0" mnemonicParsing="false" onAction="#registrarPaciente" prefHeight="25.0" prefWidth="100.0" text="Registrar" />
         <Button id="btnVolverPaciente" fx:id="btnVolverPaciente" layoutX="315.0" layoutY="281.0" mnemonicParsing="false" onAction="#volver" prefHeight="25.0" prefWidth="100.0" text="Volver" />
+      <ProgressIndicator id="progPaciente" fx:id="progPaciente" layoutX="221.0" layoutY="280.0" visible="false" />
     </children>
 </AnchorPane>

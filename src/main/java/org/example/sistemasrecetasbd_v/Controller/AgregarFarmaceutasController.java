@@ -5,13 +5,16 @@ import javafx.scene.control.Button;
 import javafx.stage.Stage;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ProgressIndicator;
 import org.example.sistemasrecetasbd_v.Logica.FarmaceutaLogica;
 import org.example.sistemasrecetasbd_v.Model.Clases.Farmaceuta;
 
 public class AgregarFarmaceutasController {
     @FXML private TextField txtIdentificacionAgregarFarmaceuta, txtNombreAgregarFarmaceuta;
-    @FXML private Button btnRegistrarFarmaceuta;
+    @FXML private Button btnRegistrarFarmaceuta, btnVolverFarmaceuta;
+    @FXML private ProgressIndicator progFarmaceuta;
 
+    private final FarmaceutaLogica logica = new FarmaceutaLogica();
     private Farmaceuta farmaceuta;
     private boolean modoEdicion = false;
 
@@ -70,12 +73,12 @@ public class AgregarFarmaceutasController {
 
 
     private void guardarFarmaceutaAsync(Farmaceuta f) {
-        if (btnRegistrarFarmaceuta != null) btnRegistrarFarmaceuta.setDisable(true);
+        btnRegistrarFarmaceuta.setDisable(true);
+        btnVolverFarmaceuta.setDisable(true);
 
         Async.run(
                 () -> {
                     try {
-                        FarmaceutaLogica logica = new FarmaceutaLogica();
                         if (modoEdicion) {
                             return logica.update(f);
                         } else {
@@ -88,14 +91,17 @@ public class AgregarFarmaceutasController {
                     }
                 },
                 guardado -> {
-                    if (btnRegistrarFarmaceuta != null) btnRegistrarFarmaceuta.setDisable(false);
+                    btnRegistrarFarmaceuta.setDisable(false);
+                    btnVolverFarmaceuta.setDisable(false);
+                    progFarmaceuta.setVisible(true);
+
                     new Alert(Alert.AlertType.INFORMATION,
                             (modoEdicion ? "Farmaceuta actualizado (ID: " : "Farmaceuta guardado (ID: ")
                                     + guardado.getId() + ")").showAndWait();
                     ((Stage) txtNombreAgregarFarmaceuta.getScene().getWindow()).close();
                 },
                 ex -> {
-                    if (btnRegistrarFarmaceuta != null) btnRegistrarFarmaceuta.setDisable(false);
+                    btnRegistrarFarmaceuta.setDisable(false);
                     new Alert(Alert.AlertType.ERROR, "No se pudo guardar: " + ex.getMessage()).showAndWait();
                 }
         );

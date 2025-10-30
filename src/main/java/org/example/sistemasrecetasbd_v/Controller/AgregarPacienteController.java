@@ -12,7 +12,8 @@ public class AgregarPacienteController {
     @FXML private TextField txtIdentificacionAgregarPaciente,
             txtNombreAgregarPaciente, txtTelefonoAgregarPaciente;
     @FXML private DatePicker dtpFechaAgregarPaciente;
-    @FXML private Button btnRegistrarPaciente;
+    @FXML private Button btnRegistrarPaciente, btnVolverPaciente;
+    @FXML private ProgressIndicator progPaciente;
 
     private Paciente paciente;
     private boolean modoEdicion = false;
@@ -79,6 +80,7 @@ public class AgregarPacienteController {
 
     private void guardarPacienteAsync(Paciente p) {
         btnRegistrarPaciente.setDisable(true);
+        btnVolverPaciente.setDisable(true);
 
         Async.run(
                 () -> {
@@ -97,6 +99,8 @@ public class AgregarPacienteController {
                 },
                 guardado -> {
                     btnRegistrarPaciente.setDisable(false);
+                    btnVolverPaciente.setDisable(false);
+                    progPaciente.setVisible(true);
                     new Alert(Alert.AlertType.INFORMATION,
                             (modoEdicion ? "Paciente actualizado (ID: " : "Paciente guardado (ID: ")
                                     + guardado.getId() + ")").showAndWait();

@@ -4,14 +4,17 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ProgressIndicator;
 import javafx.stage.Stage;
 import org.example.sistemasrecetasbd_v.Logica.MedicamentoLogica;
 import org.example.sistemasrecetasbd_v.Model.Clases.Medicamento;
 
 public class AgregarMedicamentoController {
     @FXML private TextField txtCodigoAgregarMedicamento, txtNombreAgregarMedicamento, txtPresentacionAgregarMedicamento;
-    @FXML private Button btnRegistrarMedicamento;
+    @FXML private Button btnRegistrarMedicamento, btnVolverMedicamento;
+    @FXML private ProgressIndicator progMedicamento;
 
+    private final MedicamentoLogica logica = new MedicamentoLogica();
     private Medicamento medicamento;
     private boolean modoEdicion = false;
 
@@ -71,12 +74,12 @@ public class AgregarMedicamentoController {
     }
 
     private void guardarMedicamentoAsync(Medicamento m) {
-        if (btnRegistrarMedicamento != null) btnRegistrarMedicamento.setDisable(true);
+        btnRegistrarMedicamento.setDisable(true);
+        btnVolverMedicamento.setDisable(true);
 
         Async.run(
                 () -> {
                     try {
-                        MedicamentoLogica logica = new MedicamentoLogica();
                         if (modoEdicion) {
                             return logica.update(m);
                         } else {
@@ -89,7 +92,9 @@ public class AgregarMedicamentoController {
                     }
                 },
                 guardado -> {
-                    if (btnRegistrarMedicamento != null) btnRegistrarMedicamento.setDisable(false);
+                    btnRegistrarMedicamento.setDisable(false);
+                    btnVolverMedicamento.setDisable(false);
+                    progMedicamento.setVisible(true);
                     new Alert(Alert.AlertType.INFORMATION,
                             (modoEdicion ? "Medicamento actualizado (ID: " : "Medicamento guardado (ID: ")
                                     + guardado.getId() + ")").showAndWait();

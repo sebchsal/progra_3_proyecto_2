@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ProgressIndicator;
 import javafx.stage.Stage;
 
 import org.example.sistemasrecetasbd_v.Logica.MedicoLogica;
@@ -12,8 +13,10 @@ import org.example.sistemasrecetasbd_v.Model.Clases.Medico;
 public class AgregarMedicosController {
     @FXML private TextField txtIdentificacionAgregarMedico,
             txtNombreAgregarMedico, txtEspecialidadAgregarMedico;
-    @FXML private Button btnRegistrarMedico;
+    @FXML private Button btnRegistrarMedico, btnVolverMedico;
+    @FXML private ProgressIndicator progMedico;
 
+    private final MedicoLogica logica = new MedicoLogica();
     private Medico medico;
     private boolean modoEdicion = false;
 
@@ -83,11 +86,10 @@ public class AgregarMedicosController {
 
     private void guardarMedicoAsync(Medico m) {
         btnRegistrarMedico.setDisable(true);
-
+        btnVolverMedico.setDisable(true);
         Async.run(
                 () -> {
                     try {
-                        MedicoLogica logica = new MedicoLogica();
                         if (modoEdicion) {
                             return logica.update(m);
                         } else {
@@ -100,7 +102,9 @@ public class AgregarMedicosController {
                     }
                 },
                 guardado -> {
+                    progMedico.setVisible(false);
                     btnRegistrarMedico.setDisable(false);
+                    btnVolverMedico.setDisable(true);
 
                     new Alert(Alert.AlertType.INFORMATION,
                             (modoEdicion ? "Médico actualizado (ID: " : "Médico guardado (ID: ")

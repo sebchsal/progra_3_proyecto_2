@@ -25,14 +25,21 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import javafx.beans.property.ReadOnlyStringWrapper;
 import java.time.format.DateTimeFormatter;
 
 public class InicioController implements Initializable {
+    // boton de cerrarsesion y label que indica el usuario...
     @FXML private Button btncerrarsesion;
     @FXML private Label lblusuarioactual;
 
-    // Para la ocultacion de los tab segun usuarios
+    // progressindicators
+    @FXML private ProgressIndicator progMedtab;
+    @FXML private ProgressIndicator progFarmtab;
+    @FXML private ProgressIndicator progPactab;
+    @FXML private ProgressIndicator progMedctab;
+    @FXML private ProgressIndicator progRecetatab;
+
+    // Para la ocultacion de los tab segun usuarios...
     @FXML private TabPane tabPane;
     @FXML private Tab tabMedicos, tabFarmaceutas, tabPacientes, tabMedicamentos;
 
@@ -121,7 +128,6 @@ public class InicioController implements Initializable {
         this.listaPacientes = lp;
         this.catalogoMedicamentos = cm;
         this.historicoRecetas = hr;
-        updateTables();
     }
 
     public void setUserType(String userType, Object user) {
@@ -135,119 +141,62 @@ public class InicioController implements Initializable {
     // inicializador
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        // Configurar columnas de medicos
-        colIDMedicos.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getId())));
-        colIdentificacionMedicos.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getIdentificacion())));
-        colNombreMedicos.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getNombre()));
-        colEspecialidadMedicos.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getEspecialidad()));
+        try{
+            // Configurar columnas de medicos
+            colIDMedicos.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getId())));
+            colIdentificacionMedicos.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getIdentificacion())));
+            colNombreMedicos.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getNombre()));
+            colEspecialidadMedicos.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getEspecialidad()));
 
-        // Configurar las columnas de farmaceutas
-        colIDFarmaceutas.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getId())));
-        colIdentificacionFarmaceutas.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getIdentificacion())));
-        colNombreFarmaceutas.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getNombre()));
-        // Cargar farmaceutas desde XML
+            // Configurar las columnas de farmaceutas
+            colIDFarmaceutas.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getId())));
+            colIdentificacionFarmaceutas.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getIdentificacion())));
+            colNombreFarmaceutas.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getNombre()));
+            // Cargar farmaceutas desde XML
 
-        // Configurar las columnas de pacientes
-        colIDPacientes.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getId())));
-        colIdentificacionPaciente.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getIdentificacion()));
-        colNombrePacientes.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getNombre())));
-        colFechaNacimientoPacientes.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getFechaNacimiento() == null ? "" : cd.getValue().getFechaNacimiento().format(FECHA_FMT)));
-        colTelefonoPaciente.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getTelefono() == null ? "" : cd.getValue().getTelefono()));
+            // Configurar las columnas de pacientes
+            colIDPacientes.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getId())));
+            colIdentificacionPaciente.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getIdentificacion()));
+            colNombrePacientes.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getNombre())));
+            colFechaNacimientoPacientes.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getFechaNacimiento() == null ? "" : cd.getValue().getFechaNacimiento().format(FECHA_FMT)));
+            colTelefonoPaciente.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getTelefono() == null ? "" : cd.getValue().getTelefono()));
 
-        // Configurar las columnas de medicamentos
-        colCodigoMedicamentos.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getCodigo())));
-        colNombreMedicamentos.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getNombre())));
-        colPresentacionMedicamentos.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getTipoPresentacion())));
+            // Configurar las columnas de medicamentos
+            colCodigoMedicamentos.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getCodigo())));
+            colNombreMedicamentos.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getNombre())));
+            colPresentacionMedicamentos.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getTipoPresentacion())));
 
-        // Configurar las columnas de historial
-        colCodigoHistorial.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getId())));
-        colMedicamentoHistorial.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getMedicamento().getNombre())));
-        colPacienteHistorial.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getPaciente().getNombre())));
-        colEstadoHistorial.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getEstado())));
-        colcantHistorial.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getCantidad())));
+            // Configurar las columnas de historial
+            colCodigoHistorial.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getId())));
+            colMedicamentoHistorial.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getMedicamento().getNombre())));
+            colPacienteHistorial.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getPaciente().getNombre())));
+            colEstadoHistorial.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getEstado())));
+            colcantHistorial.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getCantidad())));
 
-        // Dashboard
-        // Configura columnas de medicamentos en el dashboard
-        colCodigoMedicamentoDashboard.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getCodigo()));
-        colMedicamentoDashboard.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getNombre()));
+            // Dashboard
+            // Configura columnas de medicamentos en el dashboard
+            colCodigoMedicamentoDashboard.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getCodigo()));
+            colMedicamentoDashboard.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getNombre()));
 
-        tblMedicamentosDashboard.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        tblMedicamentosDashboard.getSelectionModel().getSelectedItems()
-                .addListener((ListChangeListener<Medicamento>) c -> cargarGraficoMedicamentos());
+            tblMedicamentosDashboard.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+            tblMedicamentosDashboard.getSelectionModel().getSelectedItems()
+                    .addListener((ListChangeListener<Medicamento>) c -> cargarGraficoMedicamentos());
 
-        // Ligar tabla con observable list
-        tblListaMedicos.setItems(observableMedicos);
-        tblListaFarmaceutas.setItems(observableFarmaceutas);
-        tblListaPacientes.setItems(observablePacientes);
-        tblListaMedicamentos.setItems(observableMedicamentos);
-        tblListaHistorial.setItems(observableHistoricoRecetas);
-        tblMedicamentosDashboard.setItems(observableMedicamentosDashboard);
-    }
-
-    private void updateTables() {
-
-        Async.run(() -> {
-            try {
-                return medicoLogica.findAll();
-            }
-            catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }, lista -> {
-            listaMedicos.setAll(lista);
-            observableMedicos.setAll(listaMedicos.getItems());
-        }, ex -> mostrarAlerta("Error al cargar médicos", ex.getMessage()));
-
-        Async.run(() -> {
-            try {
-                return farmaceutaLogica.findAll();
-            }
-            catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }, lista -> {
-            listaFarmaceutas.setAll(lista);
-            observableFarmaceutas.setAll(listaFarmaceutas.getItems());
-        }, ex -> mostrarAlerta("Error al cargar farmaceutas", ex.getMessage()));
-
-        Async.run(() -> {
-            try {
-                return pacienteLogica.findAll();
-            }
-            catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }, lista -> {
-            listaPacientes.setAll(lista);
-            observablePacientes.setAll(listaPacientes.getItems());
-        }, ex -> mostrarAlerta("Error al cargar pacientes", ex.getMessage()));
-
-        Async.run(() -> {
-            try {
-                return medicamentoLogica.findAll();
-            }
-            catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }, lista -> {
-            catalogoMedicamentos.setAll(lista);
-            observableMedicamentos.setAll(catalogoMedicamentos.getItems());
-            observableMedicamentosDashboard.setAll(catalogoMedicamentos.getItems());
-        }, ex -> mostrarAlerta("Error al cargar medicamentos", ex.getMessage()));
-
-        Async.run(() -> {
-            try {
-                return recetaLogica.findAll();
-            }
-            catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-        }, lista -> {
-            historicoRecetas.setAll(lista);
-            observableHistoricoRecetas.setAll(historicoRecetas.getItems());
-            cargarGraficoRecetas();
-            cargarGraficoMedicamentos();
-        }, ex -> mostrarAlerta("Error al cargar recetas", ex.getMessage()));
+            // Ligar tabla con observable list
+            tblListaMedicos.setItems(observableMedicos);
+            cargarMedicosAsync();
+            tblListaFarmaceutas.setItems(observableFarmaceutas);
+            cargarFarmaceutasAsync();
+            tblListaPacientes.setItems(observablePacientes);
+            cargarPacienteAsync();
+            tblListaMedicamentos.setItems(observableMedicamentos);
+            cargarMedicamentoAsync();
+            tblListaHistorial.setItems(observableHistoricoRecetas);
+            cargarRecetaAsync();
+            tblMedicamentosDashboard.setItems(observableMedicamentosDashboard);
+        }catch (Exception e) {
+            Logger.getLogger(InicioController.class.getName()).log(Level.SEVERE, null, e);
+        }
     }
 
     private void setupPermissions() {
@@ -825,7 +774,7 @@ public class InicioController implements Initializable {
             mostrarAlerta("Error al abrir detalles", e.getMessage());
         }
     }
-    // ---------- Metodos de tab Dashboard ----------
+    // Metodos de tab Dashboard
     @FXML private void buscarDashboard() {
         try {
             String criterio = txtBuscarDashboard.getText().trim().toLowerCase();
@@ -850,13 +799,11 @@ public class InicioController implements Initializable {
             graficoMedicamentos.getData().clear();
             return;
         }
-
         var seleccionados = tblMedicamentosDashboard.getSelectionModel().getSelectedItems();
         if (seleccionados == null || seleccionados.isEmpty()) {
             graficoMedicamentos.getData().clear();
             return;
         }
-
         graficoMedicamentos.getData().clear();
 
         for (Medicamento med : seleccionados) {
@@ -907,7 +854,6 @@ public class InicioController implements Initializable {
         lblRecetasProceso.setText(String.valueOf(proceso));
         lblRecetasListas.setText(String.valueOf(listas));
         lblRecetasEntregadas.setText(String.valueOf(entregadas));
-
         graficoRecetas.getData().clear();
 
         if (confeccionadas > 0) {
@@ -950,6 +896,84 @@ public class InicioController implements Initializable {
         } catch (Exception e) {
             mostrarAlerta("Error al cerrar sesion", e.getMessage());
         }
+    }
+
+    public void cargarMedicosAsync(){
+        progMedtab.setVisible(true);
+        Async.run(() -> {
+            try {
+                return medicoLogica.findAll();
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }, lista -> {
+            listaMedicos.setAll(lista);
+            observableMedicos.setAll(listaMedicos.getItems());
+        }, ex -> mostrarAlerta("Error al cargar médicos", ex.getMessage()));
+    }
+
+    public void cargarFarmaceutasAsync(){
+        progFarmtab.setVisible(true);
+        Async.run(() -> {
+            try {
+                return farmaceutaLogica.findAll();
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }, lista -> {
+            listaFarmaceutas.setAll(lista);
+            observableFarmaceutas.setAll(listaFarmaceutas.getItems());
+        }, ex -> mostrarAlerta("Error al cargar farmaceutas", ex.getMessage()));
+    }
+
+    public void cargarPacienteAsync(){
+        progPactab.setVisible(true);
+        Async.run(() -> {
+            try {
+                return pacienteLogica.findAll();
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }, lista -> {
+            listaPacientes.setAll(lista);
+            observablePacientes.setAll(listaPacientes.getItems());
+        }, ex -> mostrarAlerta("Error al cargar pacientes", ex.getMessage()));
+    }
+
+    public void cargarMedicamentoAsync(){
+        progMedctab.setVisible(true);
+        Async.run(() -> {
+            try {
+                return medicamentoLogica.findAll();
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }, lista -> {
+            catalogoMedicamentos.setAll(lista);
+            observableMedicamentos.setAll(catalogoMedicamentos.getItems());
+            observableMedicamentosDashboard.setAll(catalogoMedicamentos.getItems());
+        }, ex -> mostrarAlerta("Error al cargar medicamentos", ex.getMessage()));
+    }
+
+    public void cargarRecetaAsync(){
+        progRecetatab.setVisible(true);
+        Async.run(() -> {
+            try {
+                return recetaLogica.findAll();
+            }
+            catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }, lista -> {
+            historicoRecetas.setAll(lista);
+            observableHistoricoRecetas.setAll(historicoRecetas.getItems());
+            cargarGraficoRecetas();
+            cargarGraficoMedicamentos();
+        }, ex -> mostrarAlerta("Error al cargar recetas", ex.getMessage()));
     }
 
     // muestra las alertas
