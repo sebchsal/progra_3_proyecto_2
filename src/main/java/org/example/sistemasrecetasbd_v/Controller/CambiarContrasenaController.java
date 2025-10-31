@@ -13,7 +13,6 @@ import java.util.Optional;
 public class CambiarContrasenaController {
     // Controles de CambiarContrasena.fxml
     @FXML private TextField txtIdentificacionCambioContrasena;
-    @FXML private PasswordField pwdContrasenaActual;
     @FXML private PasswordField pwdContrasenaNueva;
     @FXML private PasswordField pwdConfirmarContrasenaNueva;
     @FXML private Button btnCambiarContrasena;
@@ -59,7 +58,6 @@ public class CambiarContrasenaController {
             return;
         }
         String identificacion = safe(txtIdentificacionCambioContrasena);
-        String actual = safe(pwdContrasenaActual);
         String nueva = safe(pwdContrasenaNueva);
         String confirma = safe(pwdConfirmarContrasenaNueva);
 
@@ -68,7 +66,7 @@ public class CambiarContrasenaController {
             error("Debe digitar la identificación.");
             return;
         }
-        if (actual.isBlank() || nueva.isBlank() || confirma.isBlank()) {
+        if (nueva.isBlank() || confirma.isBlank()) {
             error("Debe completar todos los campos.");
             return;
         }
@@ -76,10 +74,7 @@ public class CambiarContrasenaController {
             error("La nueva contraseña y su confirmación no coinciden.");
             return;
         }
-        if (nueva.equals(actual)) {
-            error("La nueva contraseña no puede ser igual a la actual.");
-            return;
-        }
+
         // Buscar usuario
         Hallazgo h = buscarHallazgoPorIdentificacion(identificacion).orElse(null);
         if (h == null) {
@@ -87,16 +82,6 @@ public class CambiarContrasenaController {
             return;
         }
 
-        int userId = h.usuario.getId();
-        boolean actualOk = switch (h.origen) {
-            case ADMIN -> administrador != null && administrador.getClave().equals(actual);
-            case MEDICO -> listaMedicos != null && listaMedicos.verificarClave(userId, actual);
-            case FARMACEUTA -> listaFarmaceutas != null && listaFarmaceutas.verificarClave(userId, actual);
-        };
-        if (!actualOk) {
-            error("La contraseña actual no es correcta.");
-            return;
-        }
         // Actualizar la clave
         boolean actualizado = switch (h.origen) {
             case ADMIN -> {
@@ -106,8 +91,8 @@ public class CambiarContrasenaController {
                 }
                 yield false;
             }
-            case MEDICO -> listaMedicos != null && listaMedicos.actualizarClave(userId, nueva);
-            case FARMACEUTA -> listaFarmaceutas != null && listaFarmaceutas.actualizarClave(userId, nueva);
+            case MEDICO -> listaMedicos != null && listaMedicos.actualizarClave(h.usuario.getId(), nueva);
+            case FARMACEUTA -> listaFarmaceutas != null && listaFarmaceutas.actualizarClave(h.usuario.getId(), nueva);
         };
         if (!actualizado) {
             error("No fue posible actualizar la contraseña.");
