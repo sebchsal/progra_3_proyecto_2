@@ -5,6 +5,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TableView;
 import javafx.stage.Stage;
 
 import org.example.sistemasrecetasbd_v.Logica.MedicoLogica;
@@ -19,6 +20,11 @@ public class AgregarMedicosController {
     private final MedicoLogica logica = new MedicoLogica();
     private Medico medico;
     private boolean modoEdicion = false;
+
+    private TableView<Medico> tablaDestino;
+    public void setTablaDestino(TableView<Medico> t) {
+        this.tablaDestino = t;
+    }
 
     // Recibe la lista y el medico o tambien los medicos modificados
     public void setMedico(Medico medico, boolean editar) {

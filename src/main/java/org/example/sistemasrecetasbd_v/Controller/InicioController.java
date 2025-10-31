@@ -242,7 +242,6 @@ public class InicioController implements Initializable {
                 default -> {
                 }
             }
-
             String userRole = switch (userType) {
                 case "admin" -> "Administrador";
                 case "medico" -> "Médico";
@@ -268,7 +267,8 @@ public class InicioController implements Initializable {
     // ---------- Metodos de tab medicos ----------
     // boton agregar
     @FXML private void agregarMedico() {
-        if (!"admin".equals(userType)) {
+        mostrarFormularioMedico(null, false);
+        /*if (!"admin".equals(userType)) {
             mostrarAlerta("Permiso denegado", "Solo los administradores pueden agregar médicos.");
             return;
         }
@@ -285,7 +285,7 @@ public class InicioController implements Initializable {
             } catch (Exception e) {
                 mostrarAlerta("Error", e.getMessage());
             }
-        }
+        }*/
     }
 
     // boton modificar
@@ -363,6 +363,7 @@ public class InicioController implements Initializable {
 
             AgregarMedicosController controller = loader.getController();
             controller.setMedico(medico, editar);
+            controller.setTablaDestino(tblListaMedicos);
 
             Stage stage = new Stage();
             stage.setTitle(editar ? "Modificar Médico" : "Agregar Médico");
@@ -380,7 +381,8 @@ public class InicioController implements Initializable {
     // ---------- Metodos de tab farmaceutas ----------
     // boton agregar
     @FXML private void agregarFarmaceuta() {
-        if (!"admin".equals(userType)) {
+        mostrarFormularioFarmaceuta(null, false);
+        /*if (!"admin".equals(userType)) {
             mostrarAlerta("Permiso denegado", "Solo los administradores pueden agregar farmaceutas.");
             return;
         }
@@ -397,7 +399,7 @@ public class InicioController implements Initializable {
             } catch (Exception e) {
                 mostrarAlerta("Error", e.getMessage());
             }
-        }
+        }*/
     }
 
     // boton modificar
@@ -470,6 +472,7 @@ public class InicioController implements Initializable {
 
             AgregarFarmaceutasController ctrl = loader.getController();
             ctrl.setFarmaceuta(farmaceuta, editar);
+            ctrl.setTablaDestino(tblListaFarmaceutas);
 
             Stage stage = new Stage();
             stage.setTitle(editar ? "Modificar Farmaceuta" : "Agregar Farmaceuta");
@@ -487,7 +490,8 @@ public class InicioController implements Initializable {
     // ---------- Metodos de tab pacientes ----------
     // boton agregar
     @FXML private void agregarPaciente() {
-        if (!"admin".equals(userType)) {
+        mostrarFormularioPaciente(null, false);
+        /*if (!"admin".equals(userType)) {
             mostrarAlerta("Permiso denegado", "Solo los administradores pueden agregar pacientes.");
             return;
         }
@@ -504,7 +508,7 @@ public class InicioController implements Initializable {
             } catch (Exception e) {
                 mostrarAlerta("Error", e.getMessage());
             }
-        }
+        }*/
     }
 
     // boton modificar
@@ -579,6 +583,7 @@ public class InicioController implements Initializable {
 
             AgregarPacienteController controller = loader.getController();
             controller.setPaciente(paciente, editar);
+            controller.setTablaDestino(tblListaPacientes);
 
             Stage stage = new Stage();
             stage.setTitle(editar ? "Modificar Paciente" : "Agregar Paciente");
@@ -595,7 +600,8 @@ public class InicioController implements Initializable {
     // ---------- Metodos de tab Medicamentos ----------
     // boton agregar
     @FXML private void agregarMedicamento() {
-        if (!"medico".equals(userType)) {
+        mostrarFormularioMedicamentos(null, false);
+        /*if (!"medico".equals(userType)) {
             mostrarAlerta("Permiso denegado", "Solo los medicos pueden agregar medicamento.");
             return;
         }
@@ -613,7 +619,7 @@ public class InicioController implements Initializable {
             } catch (Exception e) {
                 mostrarAlerta("Error", e.getMessage());
             }
-        }
+        }*/
     }
 
     // boton modificar
@@ -690,6 +696,7 @@ public class InicioController implements Initializable {
 
             AgregarMedicamentoController ctrl = loader.getController();
             ctrl.setMedicamento(medicamento, editar);
+            ctrl.setTablaDestino(tblListaMedicamentos);
 
             Stage stage = new Stage();
             stage.setTitle(editar ? "Modificar Medicamento" : "Agregar Maciente");
@@ -974,6 +981,23 @@ public class InicioController implements Initializable {
             cargarGraficoRecetas();
             cargarGraficoMedicamentos();
         }, ex -> mostrarAlerta("Error al cargar recetas", ex.getMessage()));
+    }
+
+    @FXML private void abrirChat() {
+        try {
+            // Ajusta la ruta según dónde esté tu FXML del chat:
+            // Si está en resources/client/chat.fxml usa "/client/chat.fxml"
+            var loader = new javafx.fxml.FXMLLoader(getClass().getResource("/org/example/sistemasrecetasbd_v/ChatHospital.fxml"));
+            Parent root = loader.load(); // <-- TIPADO EXPLÍCITO
+
+            Stage stage = new Stage();
+            stage.setTitle("HotelGUI Chat");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            // new Alert(Alert.AlertType.ERROR, "No se pudo abrir el chat:\n" + e.getMessage()).showAndWait();
+        }
     }
 
     // muestra las alertas

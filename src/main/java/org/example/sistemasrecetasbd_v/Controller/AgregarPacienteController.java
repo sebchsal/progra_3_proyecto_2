@@ -18,6 +18,11 @@ public class AgregarPacienteController {
     private Paciente paciente;
     private boolean modoEdicion = false;
 
+    private TableView<Paciente> tablaDestino;
+    public void setTablaDestino(TableView<Paciente> t) {
+        this.tablaDestino = t;
+    }
+
     // Recibe la lista y los pacientes
     public void setPaciente(Paciente paciente, boolean editar) {
         this.paciente = paciente;

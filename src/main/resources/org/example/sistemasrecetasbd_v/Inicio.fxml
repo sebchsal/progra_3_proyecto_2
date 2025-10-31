@@ -242,5 +242,6 @@
          </font>
       </Label>
       <Label id="lblusuarioactual" fx:id="lblusuarioactual" layoutX="68.0" layoutY="35.0" text="Label" />
+      <Button id="btnchat" fx:id="btnchat" layoutX="411.0" layoutY="31.0" mnemonicParsing="false" onAction="#abrirChat" prefHeight="25.0" prefWidth="90.0" text="Chat" />
    </children>
 </AnchorPane>

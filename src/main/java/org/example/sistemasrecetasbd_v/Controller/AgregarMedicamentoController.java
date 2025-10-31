@@ -5,6 +5,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TableView;
 import javafx.stage.Stage;
 import org.example.sistemasrecetasbd_v.Logica.MedicamentoLogica;
 import org.example.sistemasrecetasbd_v.Model.Clases.Medicamento;
@@ -17,6 +18,11 @@ public class AgregarMedicamentoController {
     private final MedicamentoLogica logica = new MedicamentoLogica();
     private Medicamento medicamento;
     private boolean modoEdicion = false;
+
+    private TableView<Medicamento> tablaDestino;
+    public void setTablaDestino(TableView<Medicamento> t) {
+        this.tablaDestino = t;
+    }
 
     public void setMedicamento(Medicamento medicamento, boolean editar) {
         this.medicamento = medicamento;

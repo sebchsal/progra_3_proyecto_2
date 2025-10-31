@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TableView;
 import org.example.sistemasrecetasbd_v.Logica.FarmaceutaLogica;
 import org.example.sistemasrecetasbd_v.Model.Clases.Farmaceuta;
 
@@ -17,6 +18,11 @@ public class AgregarFarmaceutasController {
     private final FarmaceutaLogica logica = new FarmaceutaLogica();
     private Farmaceuta farmaceuta;
     private boolean modoEdicion = false;
+
+    private TableView<Farmaceuta> tablaDestino;
+    public void setTablaDestino(TableView<Farmaceuta> t) {
+        this.tablaDestino = t;
+    }
 
     public void setFarmaceuta( Farmaceuta farmaceuta, boolean editar) {
         this.farmaceuta = farmaceuta;
