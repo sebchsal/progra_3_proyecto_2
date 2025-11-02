@@ -29,7 +29,7 @@ public class LoginController {
     @FXML private Button btnIngresarLogin, btnregistrarseLogin;
     @FXML private ProgressIndicator progress;
 
-    private Administrador administrador = new Administrador("1234","User", "1234");
+    private Administrador administrador = new Administrador("admin","User", "1234");
     private static ListaMedicos listaMedicos = new ListaMedicos();
     private static ListaFarmaceutas listaFarmaceutas = new ListaFarmaceutas();
     private static ListaPacientes listaPacientes = new ListaPacientes();

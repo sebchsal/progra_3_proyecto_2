@@ -268,24 +268,6 @@ public class InicioController implements Initializable {
     // boton agregar
     @FXML private void agregarMedico() {
         mostrarFormularioMedico(null, false);
-        /*if (!"admin".equals(userType)) {
-            mostrarAlerta("Permiso denegado", "Solo los administradores pueden agregar médicos.");
-            return;
-        }
-        Medico nuevo = mostrarFormularioMedico(null, false);
-        if (nuevo != null) {
-            if (listaMedicos.buscarPorIdentificacion(nuevo.getIdentificacion()).isPresent()) {
-                mostrarAlerta("Duplicado", "Ya existe un médico con esa identificación.");
-                return;
-            }
-            try {
-                Medico creado = medicoLogica.insert(nuevo);
-                listaMedicos.agregarOReemplazar(creado);
-                observableMedicos.add(nuevo);
-            } catch (Exception e) {
-                mostrarAlerta("Error", e.getMessage());
-            }
-        }*/
     }
 
     // boton modificar
@@ -382,24 +364,6 @@ public class InicioController implements Initializable {
     // boton agregar
     @FXML private void agregarFarmaceuta() {
         mostrarFormularioFarmaceuta(null, false);
-        /*if (!"admin".equals(userType)) {
-            mostrarAlerta("Permiso denegado", "Solo los administradores pueden agregar farmaceutas.");
-            return;
-        }
-        Farmaceuta nuevo = mostrarFormularioFarmaceuta(null, false);
-        if (nuevo != null) {
-            if (listaFarmaceutas.buscarPorIdentificacion(nuevo.getIdentificacion()).isPresent()) {
-                mostrarAlerta("Duplicado", "Ya existe un farmaceuta con esa identificación.");
-                return;
-            }
-            try {
-                Farmaceuta creado = farmaceutaLogica.insert(nuevo);
-                listaFarmaceutas.agregarOReemplazar(creado);
-                observableFarmaceutas.add(creado);
-            } catch (Exception e) {
-                mostrarAlerta("Error", e.getMessage());
-            }
-        }*/
     }
 
     // boton modificar
@@ -491,24 +455,6 @@ public class InicioController implements Initializable {
     // boton agregar
     @FXML private void agregarPaciente() {
         mostrarFormularioPaciente(null, false);
-        /*if (!"admin".equals(userType)) {
-            mostrarAlerta("Permiso denegado", "Solo los administradores pueden agregar pacientes.");
-            return;
-        }
-        Paciente nuevo = mostrarFormularioPaciente(null, false);
-        if (nuevo != null) {
-            if (listaPacientes.buscarPorIdentificacionPaciente(nuevo.getIdentificacion()).isPresent()) {
-                mostrarAlerta("Duplicado", "Ya existe un médico con esa identificación.");
-                return;
-            }
-            try {
-                Paciente creado = pacienteLogica.insert(nuevo);
-                listaPacientes.agregarOReemplazar(creado);
-                observablePacientes.add(creado);
-            } catch (Exception e) {
-                mostrarAlerta("Error", e.getMessage());
-            }
-        }*/
     }
 
     // boton modificar
@@ -601,25 +547,6 @@ public class InicioController implements Initializable {
     // boton agregar
     @FXML private void agregarMedicamento() {
         mostrarFormularioMedicamentos(null, false);
-        /*if (!"medico".equals(userType)) {
-            mostrarAlerta("Permiso denegado", "Solo los medicos pueden agregar medicamento.");
-            return;
-        }
-        Medicamento nuevo = mostrarFormularioMedicamentos(null, false);
-        if (nuevo != null) {
-            if (catalogoMedicamentos.buscarPorCodigo(nuevo.getCodigo()).isPresent()) {
-                mostrarAlerta("Duplicado", "Ya existe un médico con esa identificación.");
-                return;
-            }
-            try {
-                Medicamento creado = medicamentoLogica.insert(nuevo);
-                catalogoMedicamentos.agregarOReemplazar(creado);
-                observableMedicamentos.add(creado);
-                observableMedicamentosDashboard.add(creado);
-            } catch (Exception e) {
-                mostrarAlerta("Error", e.getMessage());
-            }
-        }*/
     }
 
     // boton modificar
@@ -917,7 +844,11 @@ public class InicioController implements Initializable {
         }, lista -> {
             listaMedicos.setAll(lista);
             observableMedicos.setAll(listaMedicos.getItems());
-        }, ex -> mostrarAlerta("Error al cargar médicos", ex.getMessage()));
+            progMedtab.setVisible(false);
+        }, ex -> {
+            progMedtab.setVisible(false);
+            mostrarAlerta("Error al cargar medicos", ex.getMessage());
+        });
     }
 
     public void cargarFarmaceutasAsync(){
@@ -932,7 +863,11 @@ public class InicioController implements Initializable {
         }, lista -> {
             listaFarmaceutas.setAll(lista);
             observableFarmaceutas.setAll(listaFarmaceutas.getItems());
-        }, ex -> mostrarAlerta("Error al cargar farmaceutas", ex.getMessage()));
+            progFarmtab.setVisible(false);
+        }, ex -> {
+            progFarmtab.setVisible(false);
+            mostrarAlerta("Error al cargar farmaceutas", ex.getMessage());
+        });
     }
 
     public void cargarPacienteAsync(){
@@ -947,7 +882,11 @@ public class InicioController implements Initializable {
         }, lista -> {
             listaPacientes.setAll(lista);
             observablePacientes.setAll(listaPacientes.getItems());
-        }, ex -> mostrarAlerta("Error al cargar pacientes", ex.getMessage()));
+            progPactab.setVisible(false);
+        }, ex -> {
+            progPactab.setVisible(false);
+            mostrarAlerta("Error al cargar pacientes", ex.getMessage());
+        });
     }
 
     public void cargarMedicamentoAsync(){
@@ -963,7 +902,11 @@ public class InicioController implements Initializable {
             catalogoMedicamentos.setAll(lista);
             observableMedicamentos.setAll(catalogoMedicamentos.getItems());
             observableMedicamentosDashboard.setAll(catalogoMedicamentos.getItems());
-        }, ex -> mostrarAlerta("Error al cargar medicamentos", ex.getMessage()));
+            progMedctab.setVisible(false);
+        }, ex -> {
+            progMedctab.setVisible(false);
+            mostrarAlerta("Error al cargar medicamentos", ex.getMessage());
+        });
     }
 
     public void cargarRecetaAsync(){
@@ -978,15 +921,17 @@ public class InicioController implements Initializable {
         }, lista -> {
             historicoRecetas.setAll(lista);
             observableHistoricoRecetas.setAll(historicoRecetas.getItems());
+            progRecetatab.setVisible(false);
             cargarGraficoRecetas();
             cargarGraficoMedicamentos();
-        }, ex -> mostrarAlerta("Error al cargar recetas", ex.getMessage()));
+        }, ex -> {
+            progRecetatab.setVisible(false);
+            mostrarAlerta("Error al cargar recetas", ex.getMessage());
+        });
     }
 
     @FXML private void abrirChat() {
         try {
-            // Ajusta la ruta según dónde esté tu FXML del chat:
-            // Si está en resources/client/chat.fxml usa "/client/chat.fxml"
             var loader = new javafx.fxml.FXMLLoader(getClass().getResource("/org/example/sistemasrecetasbd_v/ChatHospital.fxml"));
             Parent root = loader.load(); // <-- TIPADO EXPLÍCITO
 
