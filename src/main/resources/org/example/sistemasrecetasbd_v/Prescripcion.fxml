@@ -17,26 +17,26 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="691.0" prefWidth="632.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.sistemasrecetasbd_v.Controller.PrescripcionController">
+<AnchorPane prefHeight="608.0" prefWidth="633.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.sistemasrecetasbd_v.Controller.PrescripcionController">
     <children>
-        <ImageView fitHeight="44.0" fitWidth="102.0" layoutX="38.0" layoutY="40.0" pickOnBounds="true" preserveRatio="true">
+        <ImageView fitHeight="44.0" fitWidth="102.0" layoutX="71.0" layoutY="26.0" pickOnBounds="true" preserveRatio="true">
         <image>
                 <Image url="@../../../Imagenes/LogoHospital.png" />
             </image>
         </ImageView>
-        <Label layoutX="171.0" layoutY="53.0" text="Prescripción de recetas para médicos">
+        <Label layoutX="225.0" layoutY="33.0" text="Prescripción de recetas ">
         <font>
                 <Font name="Perpetua Titling MT Bold" size="18.0" />
             </font>
         </Label>
-        <Separator layoutY="115.0" prefHeight="18.0" prefWidth="20.0" />
-        <Separator layoutX="79.0" layoutY="115.0" prefHeight="18.0" prefWidth="553.0" />
-        <Label layoutX="27.0" layoutY="115.0" text="Fechas">
+        <Separator layoutY="74.0" prefHeight="18.0" prefWidth="20.0" />
+        <Separator layoutX="80.0" layoutY="74.0" prefHeight="18.0" prefWidth="553.0" />
+        <Label layoutX="27.0" layoutY="73.0" text="Fechas">
             <font>
-                <Font name="Lucida Fax Italic" size="14.0" />
+                <Font name="System Bold" size="14.0" />
             </font>
         </Label>
-        <GridPane id="grdFechasPrescripcion" fx:id="grdFechasPrescripcion" layoutX="25.0" layoutY="139.0" prefHeight="25.0" prefWidth="583.0">
+        <GridPane id="grdFechasPrescripcion" fx:id="grdFechasPrescripcion" layoutX="17.0" layoutY="93.0" prefHeight="25.0" prefWidth="583.0">
             <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" maxWidth="127.0" minWidth="10.0" prefWidth="119.0" />
                 <ColumnConstraints hgrow="SOMETIMES" maxWidth="167.0" minWidth="10.0" prefWidth="162.0" />
@@ -54,16 +54,11 @@
                 <DatePicker id="dtpFechaEntregaPrescripcion" fx:id="dtpFechaEntregaPrescripcion" GridPane.columnIndex="4" />
             </children>
         </GridPane>
-        <Separator layoutY="177.0" prefHeight="18.0" prefWidth="20.0" />
-        <Separator layoutX="147.0" layoutY="177.0" prefHeight="18.0" prefWidth="485.0" />
-        <Label layoutX="24.0" layoutY="177.0" text="Buscar paciente">
-            <font>
-                <Font name="Lucida Fax Italic" size="14.0" />
-            </font>
-        </Label>
-        <TextField id="txtBuscarPacientePrescripcion" fx:id="txtBuscarPacientePrescripcion" layoutX="27.0" layoutY="204.0" prefHeight="25.0" prefWidth="231.0" />
-        <Button id="btnBuscarPacientePrescripcion" fx:id="btnBuscarPacientePrescripcion" layoutX="269.0" layoutY="204.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="78.0" text="Buscar" />
-        <TableView id="tblPacientesPrescripcion" fx:id="tblPacientesPrescripcion" layoutX="27.0" layoutY="240.0" prefHeight="97.0" prefWidth="583.0">
+        <Separator layoutY="129.0" prefHeight="18.0" prefWidth="20.0" />
+        <Separator layoutX="147.0" layoutY="129.0" prefHeight="18.0" prefWidth="485.0" />
+        <TextField id="txtBuscarPacientePrescripcion" fx:id="txtBuscarPacientePrescripcion" layoutX="27.0" layoutY="148.0" prefHeight="25.0" prefWidth="231.0" />
+        <Button id="btnBuscarPacientePrescripcion" fx:id="btnBuscarPacientePrescripcion" layoutX="269.0" layoutY="148.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="78.0" text="Buscar" />
+        <TableView id="tblPacientesPrescripcion" fx:id="tblPacientesPrescripcion" layoutX="27.0" layoutY="184.0" prefHeight="97.0" prefWidth="583.0">
             <columns>
                 <TableColumn id="colIDPacientePrescripcion" fx:id="colIDPacientePrescripcion" prefWidth="87.99999809265137" text="Identificacion" />
                 <TableColumn id="colNombrePacientePrescripcion" fx:id="colNombrePacientePrescripcion" prefWidth="189.59998321533203" text="Nombre" />
@@ -71,30 +66,20 @@
                 <TableColumn id="colTelefonoPacientePrescripcion" fx:id="colTelefonoPacientePrescripcion" prefWidth="141.0" text="Teléfono" />
             </columns>
         </TableView>
-        <Separator layoutY="356.0" prefHeight="18.0" prefWidth="20.0" />
-        <Separator layoutX="179.0" layoutY="356.0" prefHeight="18.0" prefWidth="453.0" />
-        <Label layoutX="24.0" layoutY="356.0" text="Buscar medicamento">
-            <font>
-                <Font name="Lucida Fax Italic" size="14.0" />
-            </font>
-        </Label>
-        <TextField id="txtBuscarMedicamentoPrescripcion" fx:id="txtBuscarMedicamentoPrescripcion" layoutX="27.0" layoutY="383.0" prefHeight="25.0" prefWidth="231.0" />
-        <Button id="btnBuscarMedicamentoPrescripcion" fx:id="btnBuscarMedicamentoPrescripcion" layoutX="269.0" layoutY="383.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="78.0" text="Buscar" />
-        <TableView id="tblMedicamentosPrescripcion" fx:id="tblMedicamentosPrescripcion" layoutX="27.0" layoutY="419.0" prefHeight="97.0" prefWidth="583.0">
+        <Separator layoutY="291.0" prefHeight="18.0" prefWidth="20.0" />
+        <Separator layoutX="180.0" layoutY="291.0" prefHeight="18.0" prefWidth="453.0" />
+        <TextField id="txtBuscarMedicamentoPrescripcion" fx:id="txtBuscarMedicamentoPrescripcion" layoutX="24.0" layoutY="310.0" prefHeight="25.0" prefWidth="231.0" />
+        <Button id="btnBuscarMedicamentoPrescripcion" fx:id="btnBuscarMedicamentoPrescripcion" layoutX="266.0" layoutY="310.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="78.0" text="Buscar" />
+        <TableView id="tblMedicamentosPrescripcion" fx:id="tblMedicamentosPrescripcion" layoutX="24.0" layoutY="346.0" prefHeight="97.0" prefWidth="583.0">
             <columns>
                 <TableColumn id="colCodigoMedicamentoPrescripcion" fx:id="colCodigoMedicamentoPrescripcion" prefWidth="116.0" text="Codigo" />
                 <TableColumn id="colNombreMedicamentoPrescripcion" fx:id="colNombreMedicamentoPrescripcion" prefWidth="250.0" text="Nombre" />
                 <TableColumn id="colPresentacionMedicamentoPrescripcion" fx:id="colPresentacionMedicamentoPrescripcion" prefWidth="215.0" text="Presentación" />
             </columns>
         </TableView>
-        <Separator layoutY="530.0" prefHeight="18.0" prefWidth="20.0" />
-        <Separator layoutX="147.0" layoutY="530.0" prefHeight="18.0" prefWidth="197.0" />
-        <Label layoutX="24.0" layoutY="530.0" text="Especificaciones">
-            <font>
-                <Font name="Lucida Fax Italic" size="14.0" />
-            </font>
-        </Label>
-        <GridPane id="grdEspecificacionesPrescripcion" fx:id="grdEspecificacionesPrescripcion" layoutX="24.0" layoutY="555.0" prefHeight="60.0" prefWidth="284.0">
+        <Separator layoutX="-1.0" layoutY="457.0" prefHeight="18.0" prefWidth="20.0" />
+        <Separator layoutX="146.0" layoutY="457.0" prefHeight="18.0" prefWidth="197.0" />
+        <GridPane id="grdEspecificacionesPrescripcion" fx:id="grdEspecificacionesPrescripcion" layoutX="23.0" layoutY="477.0" prefHeight="60.0" prefWidth="284.0">
             <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" maxWidth="102.0" minWidth="10.0" prefWidth="102.0" />
                 <ColumnConstraints hgrow="SOMETIMES" maxWidth="102.0" minWidth="0.0" prefWidth="1.0" />
@@ -111,15 +96,30 @@
             <TextField id="txtduracionReceta" fx:id="txtduracionReceta" editable="false" GridPane.columnIndex="2" GridPane.rowIndex="1" />
             </children>
         </GridPane>
-        <Label layoutX="356.0" layoutY="530.0" text="Detalles">
-            <font>
-                <Font name="Lucida Fax Italic" size="14.0" />
-            </font>
-        </Label>
-        <Separator layoutX="428.0" layoutY="530.0" prefHeight="18.0" prefWidth="204.0" />
-        <TextArea id="txtAreaDetallesPrescripcion" fx:id="txtAreaDetallesPrescripcion" layoutX="356.0" layoutY="555.0" prefHeight="60.0" prefWidth="253.0" />
-        <Separator layoutX="-1.0" layoutY="630.0" prefHeight="6.0" prefWidth="632.0" />
-        <Button id="btnGuardarPrescripcion" fx:id="btnGuardarPrescripcion" layoutX="25.0" layoutY="647.0" mnemonicParsing="false" onAction="#guardarPrescripcion" prefHeight="25.0" prefWidth="155.0" text="Guardar Receta" />
-        <Button id="btnVolverPrescripcion" fx:id="btnVolverPrescripcion" layoutX="453.0" layoutY="647.0" mnemonicParsing="false" onAction="#volver" prefHeight="25.0" prefWidth="155.0" text="Volver al menú principal" />
+        <Separator layoutX="427.0" layoutY="457.0" prefHeight="18.0" prefWidth="204.0" />
+        <TextArea id="txtAreaDetallesPrescripcion" fx:id="txtAreaDetallesPrescripcion" layoutX="356.0" layoutY="477.0" prefHeight="60.0" prefWidth="253.0" />
+        <Separator layoutY="545.0" prefHeight="6.0" prefWidth="632.0" />
+        <Button id="btnGuardarPrescripcion" fx:id="btnGuardarPrescripcion" layoutX="26.0" layoutY="562.0" mnemonicParsing="false" onAction="#guardarPrescripcion" prefHeight="25.0" prefWidth="155.0" text="Guardar Receta" />
+        <Button id="btnVolverPrescripcion" fx:id="btnVolverPrescripcion" layoutX="454.0" layoutY="562.0" mnemonicParsing="false" onAction="#volver" prefHeight="25.0" prefWidth="155.0" text="Volver al menú principal" />
+      <Label layoutX="28.0" layoutY="128.0" text="Buscar paciente">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="27.0" layoutY="290.0" text="Buscar medicamento">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="27.0" layoutY="457.0" text="Especificaciones">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Label>
+      <Label layoutX="356.0" layoutY="457.0" text="Detalles">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Label>
     </children>
 </AnchorPane>
