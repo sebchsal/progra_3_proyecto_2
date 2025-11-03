@@ -322,7 +322,7 @@ public class InicioController implements Initializable {
             stage.showAndWait();
 
             return (Medico) stage.getUserData();
-        } catch (Exception e) {
+        } catch (IOException e) {
             mostrarAlerta("Error al abrir formulario", e.getMessage());
             return null;
         }
@@ -412,7 +412,7 @@ public class InicioController implements Initializable {
             stage.showAndWait();
 
             return (Farmaceuta) stage.getUserData();
-        } catch (Exception e) {
+        } catch (IOException e) {
             mostrarAlerta("Error al abrir formulario", e.getMessage());
             return null;
         }
@@ -503,7 +503,7 @@ public class InicioController implements Initializable {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
             return (Paciente) stage.getUserData();
-        } catch (Exception e) {
+        } catch (IOException e) {
             mostrarAlerta("Error al abrir formulario", e.getMessage());
             return null;
         }
@@ -595,7 +595,7 @@ public class InicioController implements Initializable {
             stage.showAndWait();
 
             return (Medicamento) stage.getUserData();
-        } catch (Exception e) {
+        } catch (IOException e) {
             mostrarAlerta("Error al abrir formulario", e.getMessage());
             return null;
         }
@@ -616,7 +616,7 @@ public class InicioController implements Initializable {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
             observableHistoricoRecetas.setAll(historicoRecetas.getItems());
-        } catch (Exception e) {
+        } catch (IOException e) {
             mostrarAlerta("Error al abrir prescripcion", e.getMessage());
         }
     }
@@ -639,7 +639,7 @@ public class InicioController implements Initializable {
                 observableHistoricoRecetas.setAll(historicoRecetas.getItems());
                 tblListaHistorial.refresh();
             }
-        } catch (Exception e) {
+        } catch (IOException e) {
             mostrarAlerta("Error al abrir despacho", e.getMessage());
         }
     }
@@ -663,7 +663,7 @@ public class InicioController implements Initializable {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             mostrarAlerta("Error al abrir detalles", e.getMessage());
         }
     }
@@ -685,7 +685,7 @@ public class InicioController implements Initializable {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
 
-        } catch (Exception e) {
+        } catch (IOException e) {
             mostrarAlerta("Error al abrir estadísticas", e.getMessage());
         }
     }
