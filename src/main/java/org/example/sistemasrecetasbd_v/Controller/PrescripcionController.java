@@ -43,7 +43,7 @@ public class PrescripcionController {
     private ListaPacientes listaPacientes;
     private CatalogoMedicamentos catalogoMedicamentos;
     private HistoricoRecetas historicoRecetas;
-    private RecetaLogica recetaLogica;
+    private final RecetaLogica recetaLogica = new RecetaLogica();
     // Wrappers observables para las tablas
     private final ObservableList<Paciente> observablePacientes = FXCollections.observableArrayList();
     private final ObservableList<Medicamento> observableMedicamentos = FXCollections.observableArrayList();
@@ -58,8 +58,6 @@ public class PrescripcionController {
         this.listaPacientes = lp;
         this.catalogoMedicamentos = cm;
         this.historicoRecetas = hr;
-        this.recetaLogica = rl;
-        if (this.recetaLogica == null) this.recetaLogica = new RecetaLogica();
         // Refrescar observables
         observablePacientes.setAll(this.listaPacientes.getItems());
         observableMedicamentos.setAll(this.catalogoMedicamentos.getItems());
@@ -219,10 +217,6 @@ public class PrescripcionController {
         if (medicamentoSeleccionado == null) {
             mostrarAlerta("Error en seleccion","Seleccione un medicamento (doble click o selección en la tabla).");
             return;
-        }
-        // Garantiza que la capa lógica exista aunque no te la hayan pasado en setListas
-        if (recetaLogica == null) {
-            recetaLogica = new RecetaLogica();
         }
         try{
             // Fechas

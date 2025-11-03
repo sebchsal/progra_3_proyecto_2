@@ -79,7 +79,7 @@ public class InicioController implements Initializable {
     @FXML private TableView<Medicamento> tblListaMedicamentos;
     @FXML private TableColumn<Medicamento, String> colCodigoMedicamentos, colNombreMedicamentos, colPresentacionMedicamentos;
     @FXML private TextField txtBuscarMedicamentos;
-    @FXML private Button btnPrescripcion, btnDespacho;
+    @FXML private Button btnPrescripcion, btnDespacho, btnEstadisticas;
     private CatalogoMedicamentos catalogoMedicamentos;
     private final ObservableList<Medicamento> observableMedicamentos = FXCollections.observableArrayList();
     // Datos para tabla de Medicamento en BD
@@ -93,27 +93,6 @@ public class InicioController implements Initializable {
             colPacienteHistorial, colEstadoHistorial, colcantHistorial;
     // Datos para tabla de Receta en BD
     private final RecetaLogica recetaLogica = new RecetaLogica();
-
-    // Dashboard
-    // Tabla de busqueda de medicamentos en dashboard
-    @FXML private TableView<Medicamento> tblMedicamentosDashboard;
-    @FXML private TableColumn<Medicamento, String> colCodigoMedicamentoDashboard;
-    @FXML private TableColumn<Medicamento, String> colMedicamentoDashboard;
-
-    @FXML private TextField txtBuscarDashboard;
-
-    // Barchart de medicamentos
-    @FXML private BarChart<String, Number> graficoMedicamentos;
-
-    private final ObservableList<Medicamento> observableMedicamentosDashboard = FXCollections.observableArrayList();
-
-    // Piechart de recetas
-    @FXML private PieChart graficoRecetas;
-    @FXML private Label lblCantidadRecetas;
-    @FXML private Label lblRecetasConfeccion;
-    @FXML private Label lblRecetasProceso;
-    @FXML private Label lblRecetasListas;
-    @FXML private Label lblRecetasEntregadas;
 
     // User information
     private String userType = "";
@@ -173,15 +152,6 @@ public class InicioController implements Initializable {
             colEstadoHistorial.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getEstado())));
             colcantHistorial.setCellValueFactory(cd -> new ReadOnlyStringWrapper(String.valueOf(cd.getValue().getCantidad())));
 
-            // Dashboard
-            // Configura columnas de medicamentos en el dashboard
-            colCodigoMedicamentoDashboard.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getCodigo()));
-            colMedicamentoDashboard.setCellValueFactory(cd -> new ReadOnlyStringWrapper(cd.getValue().getNombre()));
-
-            tblMedicamentosDashboard.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-            tblMedicamentosDashboard.getSelectionModel().getSelectedItems()
-                    .addListener((ListChangeListener<Medicamento>) c -> cargarGraficoMedicamentos());
-
             // Ligar tabla con observable list
             tblListaMedicos.setItems(observableMedicos);
             cargarMedicosAsync();
@@ -193,7 +163,6 @@ public class InicioController implements Initializable {
             cargarMedicamentoAsync();
             tblListaHistorial.setItems(observableHistoricoRecetas);
             cargarRecetaAsync();
-            tblMedicamentosDashboard.setItems(observableMedicamentosDashboard);
         }catch (Exception e) {
             Logger.getLogger(InicioController.class.getName()).log(Level.SEVERE, null, e);
         }
@@ -285,7 +254,6 @@ public class InicioController implements Initializable {
         Medico modificado = mostrarFormularioMedico(seleccionado, true);
         if (modificado != null) {
             try {
-                medicoLogica.update(modificado);
                 listaMedicos.agregarOReemplazar(modificado);
                 tblListaMedicos.refresh();
             } catch (Exception e) {
@@ -381,7 +349,6 @@ public class InicioController implements Initializable {
         Farmaceuta modificado = mostrarFormularioFarmaceuta(seleccionado, true);
         if (modificado != null) {
             try {
-                farmaceutaLogica.update(modificado);
                 listaFarmaceutas.agregarOReemplazar(modificado);
                 tblListaFarmaceutas.refresh();
             } catch (Exception e) {
@@ -472,7 +439,6 @@ public class InicioController implements Initializable {
         Paciente modificado = mostrarFormularioPaciente(seleccionado, true);
         if (modificado != null) {
             try {
-                pacienteLogica.update(modificado);
                 listaPacientes.agregarOReemplazar(modificado);
                 tblListaPacientes.refresh();
             } catch (Exception e) {
@@ -564,10 +530,8 @@ public class InicioController implements Initializable {
         Medicamento modificado = mostrarFormularioMedicamentos(seleccionado, true);
         if (modificado != null) {
             try {
-                medicamentoLogica.update(modificado);
                 catalogoMedicamentos.agregarOReemplazar(modificado);
                 tblListaMedicamentos.refresh();
-                tblMedicamentosDashboard.refresh();
             } catch (Exception e) {
                 mostrarAlerta("Error al actualizar", e.getMessage());
             }
@@ -595,7 +559,6 @@ public class InicioController implements Initializable {
 
             catalogoMedicamentos.eliminarPorId(seleccionado.getId());
             tblListaMedicamentos.getItems().remove(seleccionado);
-            observableMedicamentosDashboard.remove(seleccionado);
         } catch (Exception e) {
             mostrarAlerta("Error al eliminar medicamento", e.getMessage());
         }
@@ -653,8 +616,6 @@ public class InicioController implements Initializable {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
             observableHistoricoRecetas.setAll(historicoRecetas.getItems());
-            cargarGraficoRecetas();
-            cargarGraficoMedicamentos();
         } catch (Exception e) {
             mostrarAlerta("Error al abrir prescripcion", e.getMessage());
         }
@@ -677,8 +638,6 @@ public class InicioController implements Initializable {
             if (historicoRecetas != null) {
                 observableHistoricoRecetas.setAll(historicoRecetas.getItems());
                 tblListaHistorial.refresh();
-                cargarGraficoRecetas();
-                cargarGraficoMedicamentos();
             }
         } catch (Exception e) {
             mostrarAlerta("Error al abrir despacho", e.getMessage());
@@ -708,111 +667,26 @@ public class InicioController implements Initializable {
             mostrarAlerta("Error al abrir detalles", e.getMessage());
         }
     }
-    // Metodos de tab Dashboard
-    @FXML private void buscarDashboard() {
+
+    // Metodo para abrir la ventana de estadísticas de recetas y medicamentos
+    @FXML private void mostrarEstadisticas() {
         try {
-            String criterio = txtBuscarDashboard.getText().trim().toLowerCase();
-            if (criterio.isEmpty()) {
-                tblMedicamentosDashboard.setItems(observableMedicamentosDashboard);
-                return;
-            }
-            ObservableList<Medicamento> filtrados = FXCollections.observableArrayList(
-                    catalogoMedicamentos.getItems().stream()
-                            .filter(m -> m.getNombre().toLowerCase().contains(criterio) ||
-                                    m.getCodigo().toLowerCase().contains(criterio)).toList()
-            );
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemasrecetasbd_v/Estadisticas.fxml"));
+            Parent root = loader.load();
 
-            tblMedicamentosDashboard.setItems(filtrados);
+            // Obtener el controlador y pasarle los datos necesarios
+            org.example.sistemasrecetasbd_v.Controller.EstadisticasController controller = loader.getController();
+            controller.inicializar(tblListaHistorial, tblListaMedicamentos);
+
+            // Crear la nueva ventana
+            Stage stage = new Stage();
+            stage.setTitle("Estadísticas de Recetas");
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+
         } catch (Exception e) {
-            mostrarAlerta("Error al buscar medicamento", e.getMessage());
-        }
-    }
-
-    private void cargarGraficoMedicamentos() {
-        if (historicoRecetas == null || historicoRecetas.getItems().isEmpty()) {
-            graficoMedicamentos.getData().clear();
-            return;
-        }
-        var seleccionados = tblMedicamentosDashboard.getSelectionModel().getSelectedItems();
-        if (seleccionados == null || seleccionados.isEmpty()) {
-            graficoMedicamentos.getData().clear();
-            return;
-        }
-        graficoMedicamentos.getData().clear();
-
-        for (Medicamento med : seleccionados) {
-            XYChart.Series<String, Number> serie = new XYChart.Series<>();
-            serie.setName(med.getNombre());
-            var mesesUsados = historicoRecetas.getItems().stream()
-                    .filter(r -> r.getMedicamento() != null && r.getMedicamento().getNombre() != null)
-                    .filter(r -> med.getNombre().equalsIgnoreCase(r.getMedicamento().getNombre()))
-                    .filter(r -> r.getFechaConfeccion() != null)
-                    .map(r -> r.getFechaConfeccion().getYear() + "-" +
-                            String.format("%02d", r.getFechaConfeccion().getMonthValue())).distinct().sorted().toList();
-
-            for (String mes : mesesUsados) {
-                long cantidad = historicoRecetas.getItems().stream()
-                        .filter(r -> r.getMedicamento() != null && r.getMedicamento().getNombre() != null)
-                        .filter(r -> med.getNombre().equalsIgnoreCase(r.getMedicamento().getNombre()))
-                        .filter(r -> {
-                            if (r.getFechaConfeccion() == null) return false;
-                            String ym = r.getFechaConfeccion().getYear() + "-" +
-                                    String.format("%02d", r.getFechaConfeccion().getMonthValue());
-                            return ym.equals(mes);
-                        })
-                        .mapToLong(Receta::getCantidad).sum();
-
-                serie.getData().add(new XYChart.Data<>(mes, cantidad));
-            }
-            graficoMedicamentos.getData().add(serie);
-        }
-    }
-
-    private void cargarGraficoRecetas() {
-        if (historicoRecetas == null) return;
-
-        long confeccionadas = historicoRecetas.getItems().stream()
-                .filter(r -> "confeccionada".equalsIgnoreCase(r.getEstado())).count();
-        long proceso = historicoRecetas.getItems().stream()
-                .filter(r -> "proceso".equalsIgnoreCase(r.getEstado())).count();
-        long listas = historicoRecetas.getItems().stream()
-                .filter(r -> "lista".equalsIgnoreCase(r.getEstado())).count();
-        long entregadas = historicoRecetas.getItems().stream()
-                .filter(r -> "entregada".equalsIgnoreCase(r.getEstado())).count();
-
-        long total = confeccionadas + proceso + listas + entregadas;
-
-        // Actualizar labels de resumen
-        lblCantidadRecetas.setText(String.valueOf(total));
-        lblRecetasConfeccion.setText(String.valueOf(confeccionadas));
-        lblRecetasProceso.setText(String.valueOf(proceso));
-        lblRecetasListas.setText(String.valueOf(listas));
-        lblRecetasEntregadas.setText(String.valueOf(entregadas));
-        graficoRecetas.getData().clear();
-
-        if (confeccionadas > 0) {
-            double porcentaje = (confeccionadas * 100.0) / total;
-            PieChart.Data d1 = new PieChart.Data(String.format("Confeccionada (%.1f%%)", porcentaje), confeccionadas);
-            graficoRecetas.getData().add(d1);
-            d1.getNode().setStyle("-fx-pie-color: #3498db;");
-        }
-        if (proceso > 0) {
-            double porcentaje = (proceso * 100.0) / total;
-            PieChart.Data d2 = new PieChart.Data(String.format("Proceso (%.1f%%)", porcentaje), proceso);
-            graficoRecetas.getData().add(d2);
-            d2.getNode().setStyle("-fx-pie-color: #e74c3c;");
-        }
-        if (listas > 0) {
-            double porcentaje = (listas * 100.0) / total;
-            PieChart.Data d3 = new PieChart.Data(String.format("Lista (%.1f%%)", porcentaje), listas);
-            graficoRecetas.getData().add(d3);
-            d3.getNode().setStyle("-fx-pie-color: #f1c40f;");
-        }
-        if (entregadas > 0) {
-            double porcentaje = (entregadas * 100.0) / total;
-            PieChart.Data d4 = new PieChart.Data(String.format("Entregada (%.1f%%)", porcentaje), entregadas);
-            graficoRecetas.getData().add(d4);
-            d4.getNode().setStyle("-fx-pie-color: #2ecc71;");
+            mostrarAlerta("Error al abrir estadísticas", e.getMessage());
         }
     }
 
@@ -838,7 +712,7 @@ public class InicioController implements Initializable {
             try {
                 return medicoLogica.findAll();
             }
-            catch (Exception e) {
+            catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }, lista -> {
@@ -857,7 +731,7 @@ public class InicioController implements Initializable {
             try {
                 return farmaceutaLogica.findAll();
             }
-            catch (Exception e) {
+            catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }, lista -> {
@@ -876,7 +750,7 @@ public class InicioController implements Initializable {
             try {
                 return pacienteLogica.findAll();
             }
-            catch (Exception e) {
+            catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }, lista -> {
@@ -895,13 +769,12 @@ public class InicioController implements Initializable {
             try {
                 return medicamentoLogica.findAll();
             }
-            catch (Exception e) {
+            catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }, lista -> {
             catalogoMedicamentos.setAll(lista);
             observableMedicamentos.setAll(catalogoMedicamentos.getItems());
-            observableMedicamentosDashboard.setAll(catalogoMedicamentos.getItems());
             progMedctab.setVisible(false);
         }, ex -> {
             progMedctab.setVisible(false);
@@ -915,15 +788,13 @@ public class InicioController implements Initializable {
             try {
                 return recetaLogica.findAll();
             }
-            catch (Exception e) {
+            catch (SQLException e) {
                 throw new RuntimeException(e);
             }
         }, lista -> {
             historicoRecetas.setAll(lista);
             observableHistoricoRecetas.setAll(historicoRecetas.getItems());
             progRecetatab.setVisible(false);
-            cargarGraficoRecetas();
-            cargarGraficoMedicamentos();
         }, ex -> {
             progRecetatab.setVisible(false);
             mostrarAlerta("Error al cargar recetas", ex.getMessage());

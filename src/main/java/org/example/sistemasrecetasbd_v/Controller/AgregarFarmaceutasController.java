@@ -15,7 +15,7 @@ public class AgregarFarmaceutasController {
     @FXML private Button btnRegistrarFarmaceuta, btnVolverFarmaceuta;
     @FXML private ProgressIndicator progFarmaceuta;
 
-    private final FarmaceutaLogica logica = new FarmaceutaLogica();
+    private final FarmaceutaLogica farmaceutaLogica = new FarmaceutaLogica();
     private Farmaceuta farmaceuta;
     private boolean modoEdicion = false;
 
@@ -50,7 +50,7 @@ public class AgregarFarmaceutasController {
                 farmaceuta.setNombre(nombre);
             }
 
-           guardarFarmaceutaAsync(farmaceuta);
+           guardarFarmaceutaAsync(farmaceuta, tablaDestino);
         }catch(Exception e){
             mostrarAlerta("Error al guardar los datos", e.getMessage());
 
@@ -78,7 +78,7 @@ public class AgregarFarmaceutasController {
     }
 
 
-    private void guardarFarmaceutaAsync(Farmaceuta f) {
+    private void guardarFarmaceutaAsync(Farmaceuta f, TableView<Farmaceuta> tablaFarmaceuta) {
         btnRegistrarFarmaceuta.setDisable(true);
         btnVolverFarmaceuta.setDisable(true);
 
@@ -86,9 +86,10 @@ public class AgregarFarmaceutasController {
                 () -> {
                     try {
                         if (modoEdicion) {
-                            return logica.update(f);
+                            farmaceutaLogica.update(f);
+                            return f;
                         } else {
-                            int nuevoId = logica.insert(f).getId();
+                            int nuevoId = farmaceutaLogica.insert(f).getId();
                             f.setId(nuevoId);
                             return f;
                         }
@@ -100,6 +101,14 @@ public class AgregarFarmaceutasController {
                     btnRegistrarFarmaceuta.setDisable(false);
                     btnVolverFarmaceuta.setDisable(false);
                     progFarmaceuta.setVisible(true);
+
+                    if (tablaFarmaceuta != null) {
+                        if (modoEdicion) {
+                            tablaFarmaceuta.refresh();
+                        } else {
+                            tablaFarmaceuta.getItems().add(guardado);
+                        }
+                    }
 
                     new Alert(Alert.AlertType.INFORMATION,
                             (modoEdicion ? "Farmaceuta actualizado (ID: " : "Farmaceuta guardado (ID: ")

@@ -26,7 +26,7 @@ public class LoginController {
 
     @FXML private TextField txtIDLogin;
     @FXML private PasswordField pwdContrasenaLogin;
-    @FXML private Button btnIngresarLogin, btnregistrarseLogin;
+    @FXML private Button btnIngresarLogin;
     @FXML private ProgressIndicator progress;
 
     private Administrador administrador = new Administrador("admin","User", "1234");
@@ -153,7 +153,7 @@ public class LoginController {
                                     ? txtIDLogin.getText().trim()
                                     : null;
                     ctrl.init(administrador, listaMedicos, listaFarmaceutas, identificacionPreCargada);
-                    Stage owner = (Stage) (btnregistrarseLogin != null ? btnregistrarseLogin.getScene().getWindow()
+                    Stage owner = (Stage) (btnIngresarLogin != null ? btnIngresarLogin.getScene().getWindow()
                             : txtIDLogin.getScene().getWindow());
                     Stage dialog = new Stage();
                     dialog.initOwner(owner);

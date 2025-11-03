@@ -15,7 +15,7 @@ public class AgregarMedicamentoController {
     @FXML private Button btnRegistrarMedicamento, btnVolverMedicamento;
     @FXML private ProgressIndicator progMedicamento;
 
-    private final MedicamentoLogica logica = new MedicamentoLogica();
+    private final MedicamentoLogica medicamentoLogica = new MedicamentoLogica();
     private Medicamento medicamento;
     private boolean modoEdicion = false;
 
@@ -53,7 +53,7 @@ public class AgregarMedicamentoController {
                 medicamento.setTipoPresentacion(presentacion);
             }
 
-            guardarMedicamentoAsync(medicamento);
+            guardarMedicamentoAsync(medicamento, tablaDestino);
         } catch (Exception e) {
             mostrarAlerta("Error", e.getMessage());
         }
@@ -79,7 +79,7 @@ public class AgregarMedicamentoController {
         alert.showAndWait();
     }
 
-    private void guardarMedicamentoAsync(Medicamento m) {
+    private void guardarMedicamentoAsync(Medicamento m, TableView<Medicamento> tablaMedicamento) {
         btnRegistrarMedicamento.setDisable(true);
         btnVolverMedicamento.setDisable(true);
 
@@ -87,9 +87,10 @@ public class AgregarMedicamentoController {
                 () -> {
                     try {
                         if (modoEdicion) {
-                            return logica.update(m);
+                            medicamentoLogica.update(m);
+                            return m;
                         } else {
-                            int nuevoId = logica.insert(m).getId();
+                            int nuevoId = medicamentoLogica.insert(m).getId();
                             m.setId(nuevoId);
                             return m;
                         }
@@ -101,6 +102,14 @@ public class AgregarMedicamentoController {
                     btnRegistrarMedicamento.setDisable(false);
                     btnVolverMedicamento.setDisable(false);
                     progMedicamento.setVisible(true);
+
+                    if(tablaMedicamento != null) {
+                        if(modoEdicion) {
+                            tablaMedicamento.refresh();
+                        }else{
+                            tablaMedicamento.getItems().add(guardado);
+                        }
+                    }
                     new Alert(Alert.AlertType.INFORMATION,
                             (modoEdicion ? "Medicamento actualizado (ID: " : "Medicamento guardado (ID: ")
                                     + guardado.getId() + ")").showAndWait();

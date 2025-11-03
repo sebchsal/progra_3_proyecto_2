@@ -15,6 +15,7 @@ public class AgregarPacienteController {
     @FXML private Button btnRegistrarPaciente, btnVolverPaciente;
     @FXML private ProgressIndicator progPaciente;
 
+    private final PacienteLogica pacienteLogica = new PacienteLogica();
     private Paciente paciente;
     private boolean modoEdicion = false;
 
@@ -62,7 +63,7 @@ public class AgregarPacienteController {
                 paciente.setFechaNacimiento(fechaNac);
                 paciente.setTelefono(telefono);
             }
-            guardarPacienteAsync(paciente);
+            guardarPacienteAsync(paciente, tablaDestino);
         } catch (Exception e) {
             mostrarAlerta("Error", e.getMessage());
         }
@@ -83,18 +84,18 @@ public class AgregarPacienteController {
         alert.showAndWait();
     }
 
-    private void guardarPacienteAsync(Paciente p) {
+    private void guardarPacienteAsync(Paciente p, TableView<Paciente> tablaPaciente) {
         btnRegistrarPaciente.setDisable(true);
         btnVolverPaciente.setDisable(true);
 
         Async.run(
                 () -> {
                     try {
-                        PacienteLogica logica = new PacienteLogica();
                         if (modoEdicion) {
-                            return logica.update(p);
+                            pacienteLogica.update(p);
+                            return p;
                         } else {
-                            int nuevoId = logica.insert(p).getId();
+                            int nuevoId = pacienteLogica.insert(p).getId();
                             p.setId(nuevoId);
                             return p;
                         }
@@ -106,6 +107,15 @@ public class AgregarPacienteController {
                     btnRegistrarPaciente.setDisable(false);
                     btnVolverPaciente.setDisable(false);
                     progPaciente.setVisible(true);
+
+                    if (tablaPaciente != null) {
+                        if (modoEdicion) {
+                            tablaPaciente.refresh();
+                        } else {
+                            tablaPaciente.getItems().add(guardado);
+                        }
+                    }
+
                     new Alert(Alert.AlertType.INFORMATION,
                             (modoEdicion ? "Paciente actualizado (ID: " : "Paciente guardado (ID: ")
                                     + guardado.getId() + ")").showAndWait();

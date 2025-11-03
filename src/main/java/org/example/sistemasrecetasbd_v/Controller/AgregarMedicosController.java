@@ -17,7 +17,7 @@ public class AgregarMedicosController {
     @FXML private Button btnRegistrarMedico, btnVolverMedico;
     @FXML private ProgressIndicator progMedico;
 
-    private final MedicoLogica logica = new MedicoLogica();
+    private final MedicoLogica medicoLogica = new MedicoLogica();
     private Medico medico;
     private boolean modoEdicion = false;
 
@@ -62,7 +62,7 @@ public class AgregarMedicosController {
                 medico.setEspecialidad(especialidad);
                 medico.setClave(identificacion);
             }
-            guardarMedicoAsync(medico);
+            guardarMedicoAsync(medico, tablaDestino);
 
         } catch (Exception e) {
             mostrarAlerta("Error", e.getMessage());
@@ -90,16 +90,17 @@ public class AgregarMedicosController {
         alert.showAndWait();
     }
 
-    private void guardarMedicoAsync(Medico m) {
+    private void guardarMedicoAsync(Medico m, TableView<Medico> tablaMedico) {
         btnRegistrarMedico.setDisable(true);
         btnVolverMedico.setDisable(true);
         Async.run(
                 () -> {
                     try {
                         if (modoEdicion) {
-                            return logica.update(m);
+                            medicoLogica.update(m);
+                            return m;
                         } else {
-                            int nuevoId = logica.insert(m).getId();
+                            int nuevoId = medicoLogica.insert(m).getId();
                             m.setId(nuevoId);
                             return m;
                         }
@@ -111,6 +112,14 @@ public class AgregarMedicosController {
                     progMedico.setVisible(false);
                     btnRegistrarMedico.setDisable(false);
                     btnVolverMedico.setDisable(true);
+
+                    if (tablaMedico != null) {
+                        if (modoEdicion) {
+                            tablaMedico.refresh();
+                        } else {
+                            tablaMedico.getItems().add(guardado);
+                        }
+                    }
 
                     new Alert(Alert.AlertType.INFORMATION,
                             (modoEdicion ? "Médico actualizado (ID: " : "Médico guardado (ID: ")
