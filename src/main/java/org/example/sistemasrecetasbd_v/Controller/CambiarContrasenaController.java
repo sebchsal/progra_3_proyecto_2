@@ -3,11 +3,16 @@ package org.example.sistemasrecetasbd_v.Controller;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import org.example.sistemasrecetasbd_v.Logica.FarmaceutaLogica;
+import org.example.sistemasrecetasbd_v.Logica.MedicoLogica;
 import org.example.sistemasrecetasbd_v.Model.Clases.Administrador;
+import org.example.sistemasrecetasbd_v.Model.Clases.Farmaceuta;
+import org.example.sistemasrecetasbd_v.Model.Clases.Medico;
 import org.example.sistemasrecetasbd_v.Model.Listas.ListaMedicos;
 import org.example.sistemasrecetasbd_v.Model.Listas.ListaFarmaceutas;
 import org.example.sistemasrecetasbd_v.Model.Clases.Usuario;
 
+import java.sql.SQLException;
 import java.util.Optional;
 
 public class CambiarContrasenaController {
@@ -30,6 +35,10 @@ public class CambiarContrasenaController {
         final Origen origen;
         Hallazgo(Usuario u, Origen o) { this.usuario = u; this.origen = o; }
     }
+
+    // Lógicas para base de datos
+    private final MedicoLogica medicoLogica = new MedicoLogica();
+    private final FarmaceutaLogica farmaceutaLogica = new FarmaceutaLogica();
 
     // recibe las listas y opcionalmente pre-carga la identificación
     public void init(Administrador admin, ListaMedicos medicos, ListaFarmaceutas farmas, String identificacionPreCargada) {
@@ -83,17 +92,39 @@ public class CambiarContrasenaController {
         }
 
         // Actualizar la clave
-        boolean actualizado = switch (h.origen) {
-            case ADMIN -> {
-                if (administrador != null) {
-                    administrador.setClave(nueva);
-                    yield true;
+        boolean actualizado;
+        try {
+            actualizado = switch (h.origen) {
+                case ADMIN -> {
+                    if (administrador != null) {
+                        administrador.setClave(nueva);
+                        yield true;
+                    }
+                    yield false;
                 }
-                yield false;
-            }
-            case MEDICO -> listaMedicos != null && listaMedicos.actualizarClave(h.usuario.getId(), nueva);
-            case FARMACEUTA -> listaFarmaceutas != null && listaFarmaceutas.actualizarClave(h.usuario.getId(), nueva);
-        };
+                case MEDICO -> {
+                    if (listaMedicos != null && listaMedicos.actualizarClave(h.usuario.getId(), nueva)) {
+                        Medico medico = (Medico) h.usuario;
+                        medico.setClave(nueva);
+                        medicoLogica.update(medico);
+                        yield true;
+                    }
+                    yield false;
+                }
+                case FARMACEUTA -> {
+                    if (listaFarmaceutas != null && listaFarmaceutas.actualizarClave(h.usuario.getId(), nueva)) {
+                        Farmaceuta farma = (Farmaceuta) h.usuario;
+                        farma.setClave(nueva);
+                        farmaceutaLogica.update(farma);
+                        yield true;
+                    }
+                    yield false;
+                }
+            };
+        } catch (SQLException e) {
+            error("Error al actualizar en la base de datos: " + e.getMessage());
+            return;
+        }
         if (!actualizado) {
             error("No fue posible actualizar la contraseña.");
             return;
