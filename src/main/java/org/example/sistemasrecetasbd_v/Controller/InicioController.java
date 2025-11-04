@@ -812,7 +812,6 @@ public class InicioController implements Initializable {
             stage.show();
         } catch (Exception e) {
             e.printStackTrace();
-            // new Alert(Alert.AlertType.ERROR, "No se pudo abrir el chat:\n" + e.getMessage()).showAndWait();
         }
     }
 

@@ -10,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.example.sistemasrecetasbd_v.Logica.RecetaLogica;
+import org.example.sistemasrecetasbd_v.Logica.DespachoLogica;
 import org.example.sistemasrecetasbd_v.Model.Listas.HistoricoRecetas;
 import org.example.sistemasrecetasbd_v.Model.Clases.Receta;
 
@@ -129,28 +130,20 @@ public class DespachoController {
     }
 
     @FXML private void guardarCambios() {
-        if (seleccionada == null) {
-            mostrarAlerta("Error","Seleccione una receta.");
-            return;
-        }
-
-        String nuevoEstado = cbxEstadoReceta.getSelectionModel().getSelectedItem();
-        if (nuevoEstado == null || nuevoEstado.isBlank()) {
-            mostrarAlerta("Error","Seleccione un estado para la receta.");
-            return;
-        }
-
         try {
-            // Actualizar objeto en memoria
-            seleccionada.setEstado(nuevoEstado);
+            // Validar usando DespachoLogica
+            String nuevoEstado = cbxEstadoReceta.getSelectionModel().getSelectedItem();
+            DespachoLogica.validarCambiosReceta(seleccionada, nuevoEstado);
+
+            // Actualizar objeto en memoria usando DespachoLogica
             LocalDate confe = dtpFechaConfeccion.getValue();
             LocalDate entr = dtpFechaEntregaReceta.getValue();
-            if (confe != null) seleccionada.setFechaConfeccion(confe);
-            if (entr != null)   seleccionada.setFechaEntrega(entr);
             String det = txtAreaDetallesReceta.getText();
-            if (det != null) seleccionada.setDetalle(det.trim());
-            // Persistir/actualizar en HistoricoRecetas
-            actualizarEnHistoricoSinDuplicar(historicoRecetas, seleccionada);
+
+            DespachoLogica.actualizarReceta(seleccionada, nuevoEstado, confe, entr, det);
+
+            // Persistir/actualizar en HistoricoRecetas usando DespachoLogica
+            DespachoLogica.actualizarEnHistoricoSinDuplicar(historicoRecetas, seleccionada);
 
             Async.run(() -> {
                 try {
@@ -173,23 +166,11 @@ public class DespachoController {
                 mostrarAlerta("Error al guardar los cambios", ex.getMessage());
             });
 
+        } catch (IllegalArgumentException ex) {
+            mostrarAlerta("Error de validación", ex.getMessage());
         } catch (Exception ex) {
             mostrarAlerta("No se pudo guardar: ", ex.getMessage());
             ex.printStackTrace();
-        }
-    }
-
-    private void actualizarEnHistoricoSinDuplicar(HistoricoRecetas historico, Receta r) {
-        if (historico == null || historico.getItems() == null || r == null) return;
-        var lista = historico.getItems();
-        for (int i = 0; i < lista.size(); i++) {
-            Receta cur = lista.get(i);
-            // Misma referencia o mismo id => reemplazar posición y salir
-            if (cur == r || (cur != null && java.util.Objects.equals(cur.getId(), r.getId()))) {
-                // Si es la misma referencia, set(i, r) no duplica
-                lista.set(i, r);
-                return;
-            }
         }
     }
 

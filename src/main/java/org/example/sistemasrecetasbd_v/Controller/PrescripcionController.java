@@ -3,14 +3,13 @@ package org.example.sistemasrecetasbd_v.Controller;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.transformation.FilteredList;
-import javafx.collections.transformation.SortedList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 
 import org.example.sistemasrecetasbd_v.Logica.RecetaLogica;
+import org.example.sistemasrecetasbd_v.Logica.PrescripcionLogica;
 import org.example.sistemasrecetasbd_v.Model.Listas.HistoricoRecetas;
 import org.example.sistemasrecetasbd_v.Model.Clases.Medicamento;
 import org.example.sistemasrecetasbd_v.Model.Clases.Paciente;
@@ -20,9 +19,6 @@ import org.example.sistemasrecetasbd_v.Model.Listas.ListaPacientes;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.Locale;
-import java.util.Objects;
 
 public class PrescripcionController {
 
@@ -50,7 +46,7 @@ public class PrescripcionController {
     // Selecciones
     private Paciente pacienteSeleccionado;
     private Medicamento medicamentoSeleccionado;
-
+    // formatea la fecha
     private static final DateTimeFormatter FECHA_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     // se llama desde InicioController al abrir la ventana
@@ -66,8 +62,7 @@ public class PrescripcionController {
         montarBusquedaMedicamentos();
     }
 
-    @FXML
-    public void initialize() {
+    @FXML  public void initialize() {
         // cantidad para el spinner del 1-999
         spnCantidadPrescripcion.setValueFactory(
                 new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 999, 1));
@@ -127,68 +122,32 @@ public class PrescripcionController {
 
     // búsqueda pacientes
     private void montarBusquedaPacientes() {
-        if (observablePacientes.isEmpty()) {
-            tblPacientesPrescripcion.setItems(observablePacientes);
-            return;
-        }
-        try{
-            // filtra la lista
-            FilteredList<Paciente> filtered = new FilteredList<>(observablePacientes, p -> true);
-            txtBuscarPacientePrescripcion.textProperty().addListener((obs, a, b) -> {
-                String q = (b == null ? "" : b.trim().toLowerCase());
-                filtered.setPredicate(p -> {
-                    if (q.isEmpty()) return true;
-                    String id = p.getIdentificacion().toLowerCase();
-                    String nombre = p.getNombre().toLowerCase();
-                    return id.contains(q) || nombre.contains(q);
-                });
-            });
-            SortedList<Paciente> sorted = new SortedList<>(filtered);
-            sorted.comparatorProperty().bind(tblPacientesPrescripcion.comparatorProperty());
-            tblPacientesPrescripcion.setItems(sorted);
+        try {
+            PrescripcionLogica.montarBusquedaPacientes(observablePacientes, tblPacientesPrescripcion, txtBuscarPacientePrescripcion);
         } catch (Exception e) {
             mostrarAlerta("Error", e.getMessage());
         }
     }
+
     // búsqueda medicamentos
     private void montarBusquedaMedicamentos() {
-        if (observableMedicamentos.isEmpty()) {
-            tblMedicamentosPrescripcion.setItems(observableMedicamentos);
-            return;
-        }
-        try{
-            // filtra la lista
-            FilteredList<Medicamento> filtered = new FilteredList<>(observableMedicamentos, m -> true);
-            txtBuscarMedicamentoPrescripcion.textProperty().addListener((obs, a, b) -> {
-                String q = (b == null ? "" : b.trim().toLowerCase(Locale.ROOT));
-                filtered.setPredicate(m -> {
-                    if (q.isEmpty()) return true;
-                    String codigo = m.getCodigo().toLowerCase();
-                    String nombre = m.getNombre().toLowerCase(Locale.ROOT);
-                    return codigo.contains(q) || nombre.contains(q);
-                });
-            });
-            SortedList<Medicamento> sorted = new SortedList<>(filtered);
-            sorted.comparatorProperty().bind(tblMedicamentosPrescripcion.comparatorProperty());
-            tblMedicamentosPrescripcion.setItems(sorted);
+        try {
+            PrescripcionLogica.montarBusquedaMedicamentos(observableMedicamentos, tblMedicamentosPrescripcion, txtBuscarMedicamentoPrescripcion);
         } catch (Exception e) {
             mostrarAlerta("Error", e.getMessage());
         }
-
     }
+
     //  calcula la duración con las fechas
     private void recalcularDuracion() {
-        try{
+        try {
             LocalDate confe = dtpFechaConfeccionPrescripcion.getValue();
             LocalDate entre = dtpFechaEntregaPrescripcion.getValue();
-            if (confe != null && entre != null) {
-                long dias = ChronoUnit.DAYS.between(confe, entre);
-                txtduracionReceta.setText(String.valueOf(dias));
-            } else {
-                txtduracionReceta.clear();
-            }
-        }catch (Exception e){
+            long duracion = PrescripcionLogica.recalcularDuracion(confe, entre);
+            txtduracionReceta.setText(String.valueOf(duracion));
+        } catch (Exception e) {
             mostrarAlerta("Error", e.getMessage());
+            txtduracionReceta.clear();
         }
     }
 
@@ -209,46 +168,21 @@ public class PrescripcionController {
         if (medicamentoSeleccionado == null) {
             medicamentoSeleccionado = tblMedicamentosPrescripcion.getSelectionModel().getSelectedItem();
         }
-        // Validar selección efectiva
-        if (pacienteSeleccionado == null) {
-            mostrarAlerta("Error en seleccion","Seleccione un paciente (doble click o selección en la tabla).");
-            return;
-        }
-        if (medicamentoSeleccionado == null) {
-            mostrarAlerta("Error en seleccion","Seleccione un medicamento (doble click o selección en la tabla).");
-            return;
-        }
-        try{
-            // Fechas
+
+        try {
+            // Validar selección efectiva y datos
             LocalDate confe = dtpFechaConfeccionPrescripcion.getValue();
             LocalDate entre = dtpFechaEntregaPrescripcion.getValue();
-            if (confe == null || entre == null) {
-                mostrarAlerta("Error en fecha", "Indique la fecha de confeccion y entrega");
-                return;
-            }
-            if (entre.isBefore(confe)) {
-                mostrarAlerta("Error en fecha","La fecha de entrega no puede ser anterior a la de confección.");
-                return;
-            }
             int cantidad = spnCantidadPrescripcion.getValue() == null ? 1 : spnCantidadPrescripcion.getValue();
             String detalle = txtAreaDetallesPrescripcion.getText() == null ? "" : txtAreaDetallesPrescripcion.getText().trim();
-            if (cantidad <= 0 && detalle.isEmpty()) {
-                mostrarAlerta("Error", "Cantidad debe ser mayor a cero y debe haber un detelle");
-                return;
-            }
-            // Evitar duplicados
-            boolean duplicada = historicoRecetas.getItems().stream().anyMatch(r ->
-                    r != null && r.getPaciente() != null && r.getMedicamento() != null &&
-                            "confeccionada".equalsIgnoreCase(r.getEstado()) &&
-                            igualesPaciente(r.getPaciente(), pacienteSeleccionado) &&
-                            igualesMedicamento(r.getMedicamento(), medicamentoSeleccionado) &&
-                            Objects.equals(r.getFechaConfeccion(), confe)
-            );
-            if (duplicada) {
-                mostrarAlerta("Error", "Ya existe una receta confeccionada hoy para ese paciente y medicamento.");
-                return;
-            }
-            Receta nueva = new Receta("confeccionada", cantidad, detalle, medicamentoSeleccionado, pacienteSeleccionado, confe, entre);
+
+            // Validar usando PrescripcionLogica
+            PrescripcionLogica.validarGuardarPrescripcion(historicoRecetas, pacienteSeleccionado,
+                    medicamentoSeleccionado, confe, entre, cantidad, detalle);
+
+            // Crear receta usando PrescripcionLogica
+            Receta nueva = PrescripcionLogica.crearReceta(pacienteSeleccionado, medicamentoSeleccionado,
+                    confe, entre, cantidad, detalle);
 
             Async.run(() -> {
                 try {
@@ -275,26 +209,11 @@ public class PrescripcionController {
                 mostrarAlerta("Error al guardar la receta", ex.getMessage());
             });
 
+        } catch (IllegalArgumentException e) {
+            mostrarAlerta("Error de validación", e.getMessage());
         } catch (Exception e) {
             mostrarAlerta("Error", e.getMessage());
         }
-    }
-
-    private static boolean igualesPaciente(Paciente a, Paciente b) {
-        try {
-            // compara por identificacion si existe, si no por id
-            String ai = String.valueOf(a.getIdentificacion());
-            String bi = String.valueOf(b.getIdentificacion());
-            if (ai != null && bi != null && !ai.equals("null") && !bi.equals("null")) {
-                return ai.equals(bi);
-            }
-        } catch (Exception ignored) {}
-        try { return Objects.equals(a.getId(), b.getId()); } catch (Exception e) { return a == b; }
-    }
-
-    private static boolean igualesMedicamento(Medicamento a, Medicamento b) {
-        try { return Objects.equals(a.getId(), b.getId()); }
-        catch (Exception e) { return a == b; }
     }
 
     @FXML private void volver() {

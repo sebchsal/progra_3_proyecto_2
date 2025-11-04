@@ -1,8 +1,6 @@
 package org.example.sistemasrecetasbd_v.Logica;
 
-import org.example.sistemasrecetasbd_v.Data.MedicamentoDatos;
 import org.example.sistemasrecetasbd_v.Data.PacienteDatos;
-import org.example.sistemasrecetasbd_v.Model.Clases.Medicamento;
 import org.example.sistemasrecetasbd_v.Model.Clases.Paciente;
 
 import java.sql.SQLException;
