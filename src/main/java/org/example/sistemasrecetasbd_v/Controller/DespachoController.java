@@ -163,7 +163,7 @@ public class DespachoController {
                          "op": "update",
                          "data": %s
                     }
-                     """.formatted(gson.toJson(seleccionada));
+                    \s""".formatted(gson.toJson(seleccionada));
 
                     String respuesta = servicio.enviar(json);
                     return gson.fromJson(respuesta, Receta.class);
