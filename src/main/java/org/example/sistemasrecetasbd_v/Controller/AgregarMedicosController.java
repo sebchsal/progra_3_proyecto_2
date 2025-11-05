@@ -1,5 +1,6 @@
 package org.example.sistemasrecetasbd_v.Controller;
 
+import com.google.gson.Gson;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -8,7 +9,8 @@ import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableView;
 import javafx.stage.Stage;
 
-import org.example.sistemasrecetasbd_v.Logica.MedicoLogica;
+import org.example.sistemasrecetasbd_v.Data.GsonProvider;
+import org.example.sistemasrecetasbd_v.Servicios.UserSocketService;
 import org.example.sistemasrecetasbd_v.Model.Clases.Medico;
 
 public class AgregarMedicosController {
@@ -17,7 +19,7 @@ public class AgregarMedicosController {
     @FXML private Button btnRegistrarMedico, btnVolverMedico;
     @FXML private ProgressIndicator progMedico;
 
-    private final MedicoLogica medicoLogica = new MedicoLogica();
+    private final Gson gson = GsonProvider.get();
     private Medico medico;
     private boolean modoEdicion = false;
 
@@ -93,17 +95,27 @@ public class AgregarMedicosController {
     private void guardarMedicoAsync(Medico m, TableView<Medico> tablaMedico) {
         btnRegistrarMedico.setDisable(true);
         btnVolverMedico.setDisable(true);
+        progMedico.setVisible(true);
+
         Async.run(
                 () -> {
                     try {
-                        if (modoEdicion) {
-                            medicoLogica.update(m);
-                            return m;
-                        } else {
-                            int nuevoId = medicoLogica.insert(m).getId();
-                            m.setId(nuevoId);
-                            return m;
-                        }
+                        UserSocketService servicio = new UserSocketService();
+                        String json = """
+                    {
+                      "tipo": "medico",
+                      "op": "%s",
+                      "data": %s
+                    }
+                    """.formatted(modoEdicion ? "update" : "create", gson.toJson(m));
+
+                        String respuesta = servicio.enviar(json);
+                        Medico guardado = gson.fromJson(respuesta, Medico.class);
+
+                        if (!modoEdicion && guardado != null)
+                            m.setId(guardado.getId());
+
+                        return m;
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -111,14 +123,11 @@ public class AgregarMedicosController {
                 guardado -> {
                     progMedico.setVisible(false);
                     btnRegistrarMedico.setDisable(false);
-                    btnVolverMedico.setDisable(true);
+                    btnVolverMedico.setDisable(false);
 
                     if (tablaMedico != null) {
-                        if (modoEdicion) {
-                            tablaMedico.refresh();
-                        } else {
-                            tablaMedico.getItems().add(guardado);
-                        }
+                        if (modoEdicion) tablaMedico.refresh();
+                        else tablaMedico.getItems().add(guardado);
                     }
 
                     new Alert(Alert.AlertType.INFORMATION,
@@ -128,9 +137,11 @@ public class AgregarMedicosController {
                     ((Stage) txtNombreAgregarMedico.getScene().getWindow()).close();
                 },
                 ex -> {
+                    progMedico.setVisible(false);
                     btnRegistrarMedico.setDisable(false);
-                    new Alert(Alert.AlertType.ERROR, "No se pudo guardar: " + ex.getMessage()).showAndWait();
+                    new Alert(Alert.AlertType.ERROR, "No se pudo guardar el médico: " + ex.getMessage()).showAndWait();
                 }
         );
     }
+
 }

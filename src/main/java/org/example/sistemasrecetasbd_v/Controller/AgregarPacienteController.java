@@ -1,9 +1,11 @@
 package org.example.sistemasrecetasbd_v.Controller;
 
+import com.google.gson.Gson;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import org.example.sistemasrecetasbd_v.Logica.PacienteLogica;
+import org.example.sistemasrecetasbd_v.Data.GsonProvider;
+import org.example.sistemasrecetasbd_v.Servicios.UserSocketService;
 import org.example.sistemasrecetasbd_v.Model.Clases.Paciente;
 
 import java.time.LocalDate;
@@ -15,7 +17,7 @@ public class AgregarPacienteController {
     @FXML private Button btnRegistrarPaciente, btnVolverPaciente;
     @FXML private ProgressIndicator progPaciente;
 
-    private final PacienteLogica pacienteLogica = new PacienteLogica();
+    private final Gson gson = GsonProvider.get();
     private Paciente paciente;
     private boolean modoEdicion = false;
 
@@ -87,44 +89,53 @@ public class AgregarPacienteController {
     private void guardarPacienteAsync(Paciente p, TableView<Paciente> tablaPaciente) {
         btnRegistrarPaciente.setDisable(true);
         btnVolverPaciente.setDisable(true);
+        progPaciente.setVisible(true);
 
         Async.run(
                 () -> {
                     try {
-                        if (modoEdicion) {
-                            pacienteLogica.update(p);
-                            return p;
-                        } else {
-                            int nuevoId = pacienteLogica.insert(p).getId();
-                            p.setId(nuevoId);
-                            return p;
-                        }
+                        UserSocketService servicio = new UserSocketService();
+                        String json = """
+                    {
+                      "tipo": "paciente",
+                      "op": "%s",
+                      "data": %s
+                    }
+                    """.formatted(modoEdicion ? "update" : "create", gson.toJson(p));
+
+                        String respuesta = servicio.enviar(json);
+                        Paciente guardado = gson.fromJson(respuesta, Paciente.class);
+
+                        if (!modoEdicion && guardado != null)
+                            p.setId(guardado.getId());
+
+                        return p;
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 },
                 guardado -> {
+                    progPaciente.setVisible(false);
                     btnRegistrarPaciente.setDisable(false);
                     btnVolverPaciente.setDisable(false);
-                    progPaciente.setVisible(true);
 
                     if (tablaPaciente != null) {
-                        if (modoEdicion) {
-                            tablaPaciente.refresh();
-                        } else {
-                            tablaPaciente.getItems().add(guardado);
-                        }
+                        if (modoEdicion) tablaPaciente.refresh();
+                        else tablaPaciente.getItems().add(guardado);
                     }
 
                     new Alert(Alert.AlertType.INFORMATION,
                             (modoEdicion ? "Paciente actualizado (ID: " : "Paciente guardado (ID: ")
                                     + guardado.getId() + ")").showAndWait();
+
                     ((Stage) txtNombreAgregarPaciente.getScene().getWindow()).close();
                 },
                 ex -> {
+                    progPaciente.setVisible(false);
                     btnRegistrarPaciente.setDisable(false);
-                    new Alert(Alert.AlertType.ERROR, "No se pudo guardar: " + ex.getMessage()).showAndWait();
+                    new Alert(Alert.AlertType.ERROR, "No se pudo guardar el paciente: " + ex.getMessage()).showAndWait();
                 }
         );
     }
+
 }

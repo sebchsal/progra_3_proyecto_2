@@ -1,5 +1,6 @@
 package org.example.sistemasrecetasbd_v.Controller;
 
+import com.google.gson.Gson;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -10,6 +11,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 
+import org.example.sistemasrecetasbd_v.Data.GsonProvider;
 import org.example.sistemasrecetasbd_v.Logica.RecetaLogica;
 import org.example.sistemasrecetasbd_v.Model.Listas.HistoricoRecetas;
 import org.example.sistemasrecetasbd_v.Model.Clases.Medicamento;
@@ -17,6 +19,7 @@ import org.example.sistemasrecetasbd_v.Model.Clases.Paciente;
 import org.example.sistemasrecetasbd_v.Model.Clases.Receta;
 import org.example.sistemasrecetasbd_v.Model.Listas.CatalogoMedicamentos;
 import org.example.sistemasrecetasbd_v.Model.Listas.ListaPacientes;
+import org.example.sistemasrecetasbd_v.Servicios.UserSocketService;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -39,6 +42,7 @@ public class PrescripcionController {
     @FXML private TableColumn<Medicamento, String> colCodigoMedicamentoPrescripcion,
             colNombreMedicamentoPrescripcion, colPresentacionMedicamentoPrescripcion;
 
+    private final Gson gson = GsonProvider.get();
     // Listas base, inyectadas desde InicioController
     private ListaPacientes listaPacientes;
     private CatalogoMedicamentos catalogoMedicamentos;
@@ -252,15 +256,23 @@ public class PrescripcionController {
 
             Async.run(() -> {
                 try {
-                    // Se ejecuta en segundo plano
-                    return recetaLogica.insert(nueva);
+                    UserSocketService servicio = new UserSocketService();
+                    String json = """
+                    {
+                        "tipo": "receta",
+                        "op": "create",
+                        "data": %s
+                    }
+                    """.formatted(gson.toJson(nueva));
+
+                    String respuesta = servicio.enviar(json);
+                    return gson.fromJson(respuesta, Receta.class);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }, persistida -> {
-                // Se ejecuta en el hilo de la UI
                 if (persistida == null) {
-                    mostrarAlerta("Error", "No se pudo guardar la receta en la base de datos.");
+                    mostrarAlerta("Error", "No se pudo guardar la receta en el servidor.");
                     return;
                 }
                 historicoRecetas.agregarOReemplazar(persistida);

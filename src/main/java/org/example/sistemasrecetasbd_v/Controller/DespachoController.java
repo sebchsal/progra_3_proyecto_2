@@ -1,5 +1,6 @@
 package org.example.sistemasrecetasbd_v.Controller;
 
+import com.google.gson.Gson;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -9,15 +10,15 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.example.sistemasrecetasbd_v.Data.GsonProvider;
 import org.example.sistemasrecetasbd_v.Logica.RecetaLogica;
 import org.example.sistemasrecetasbd_v.Model.Listas.HistoricoRecetas;
 import org.example.sistemasrecetasbd_v.Model.Clases.Receta;
+import org.example.sistemasrecetasbd_v.Servicios.UserSocketService;
 
 import java.time.LocalDate;
 
 public class DespachoController {
-
-    // --- FXML controls from Despacho.fxml ---
     @FXML private Button btnVolverReceta;
 
     @FXML private TextField txtIDReceta;
@@ -41,6 +42,7 @@ public class DespachoController {
     private HistoricoRecetas historicoRecetas;
     private Receta seleccionada;
     private RecetaLogica recetaLogica;
+    private final Gson gson = GsonProvider.get();
 
     // Carga de listas desde InicioController
     public void setListas(HistoricoRecetas historicoRecetas, RecetaLogica rl) {
@@ -154,20 +156,28 @@ public class DespachoController {
 
             Async.run(() -> {
                 try {
-                    // Se ejecuta fuera del hilo de interfaz
-                    return recetaLogica.update(seleccionada);
+                    UserSocketService servicio = new UserSocketService();
+                    String json = """
+                    {
+                         "tipo": "receta",
+                         "op": "update",
+                         "data": %s
+                    }
+                     """.formatted(gson.toJson(seleccionada));
+
+                    String respuesta = servicio.enviar(json);
+                    return gson.fromJson(respuesta, Receta.class);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }, actualizada -> {
-                // Se ejecuta en el hilo de interfaz
                 if (actualizada != null) {
-                    txtEstadoReceta.setText(nuevoEstado);
+                    txtEstadoReceta.setText(actualizada.getEstado());
                     tblReceta.refresh();
                     volverAInicio();
                     mostrarAlerta("Éxito", "Receta actualizada correctamente.");
                 } else {
-                    mostrarAlerta("Error", "No se pudo actualizar la receta.");
+                    mostrarAlerta("Error", "No se pudo actualizar la receta en el servidor.");
                 }
             }, ex -> {
                 mostrarAlerta("Error al guardar los cambios", ex.getMessage());

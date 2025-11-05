@@ -1,5 +1,6 @@
 package org.example.sistemasrecetasbd_v.Controller;
 
+import com.google.gson.Gson;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -7,7 +8,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableView;
 import javafx.stage.Stage;
-import org.example.sistemasrecetasbd_v.Logica.MedicamentoLogica;
+import org.example.sistemasrecetasbd_v.Data.GsonProvider;
+import org.example.sistemasrecetasbd_v.Servicios.UserSocketService;
 import org.example.sistemasrecetasbd_v.Model.Clases.Medicamento;
 
 public class AgregarMedicamentoController {
@@ -15,7 +17,7 @@ public class AgregarMedicamentoController {
     @FXML private Button btnRegistrarMedicamento, btnVolverMedicamento;
     @FXML private ProgressIndicator progMedicamento;
 
-    private final MedicamentoLogica medicamentoLogica = new MedicamentoLogica();
+    private final Gson gson = GsonProvider.get();
     private Medicamento medicamento;
     private boolean modoEdicion = false;
 
@@ -82,43 +84,53 @@ public class AgregarMedicamentoController {
     private void guardarMedicamentoAsync(Medicamento m, TableView<Medicamento> tablaMedicamento) {
         btnRegistrarMedicamento.setDisable(true);
         btnVolverMedicamento.setDisable(true);
+        progMedicamento.setVisible(true);
 
         Async.run(
                 () -> {
                     try {
-                        if (modoEdicion) {
-                            medicamentoLogica.update(m);
-                            return m;
-                        } else {
-                            int nuevoId = medicamentoLogica.insert(m).getId();
-                            m.setId(nuevoId);
-                            return m;
-                        }
+                        UserSocketService servicio = new UserSocketService();
+                        String json = """
+                    {
+                      "tipo": "medicamento",
+                      "op": "%s",
+                      "data": %s
+                    }
+                    """.formatted(modoEdicion ? "update" : "create", gson.toJson(m));
+
+                        String respuesta = servicio.enviar(json);
+                        Medicamento guardado = gson.fromJson(respuesta, Medicamento.class);
+
+                        if (!modoEdicion && guardado != null)
+                            m.setId(guardado.getId());
+
+                        return m;
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 },
                 guardado -> {
+                    progMedicamento.setVisible(false);
                     btnRegistrarMedicamento.setDisable(false);
                     btnVolverMedicamento.setDisable(false);
-                    progMedicamento.setVisible(true);
 
-                    if(tablaMedicamento != null) {
-                        if(modoEdicion) {
-                            tablaMedicamento.refresh();
-                        }else{
-                            tablaMedicamento.getItems().add(guardado);
-                        }
+                    if (tablaMedicamento != null) {
+                        if (modoEdicion) tablaMedicamento.refresh();
+                        else tablaMedicamento.getItems().add(guardado);
                     }
+
                     new Alert(Alert.AlertType.INFORMATION,
                             (modoEdicion ? "Medicamento actualizado (ID: " : "Medicamento guardado (ID: ")
                                     + guardado.getId() + ")").showAndWait();
+
                     ((Stage) txtNombreAgregarMedicamento.getScene().getWindow()).close();
                 },
                 ex -> {
-                    if (btnRegistrarMedicamento != null) btnRegistrarMedicamento.setDisable(false);
-                    new Alert(Alert.AlertType.ERROR, "No se pudo guardar: " + ex.getMessage()).showAndWait();
+                    progMedicamento.setVisible(false);
+                    btnRegistrarMedicamento.setDisable(false);
+                    new Alert(Alert.AlertType.ERROR, "No se pudo guardar el medicamento: " + ex.getMessage()).showAndWait();
                 }
         );
     }
+
 }

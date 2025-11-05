@@ -1,5 +1,6 @@
 package org.example.sistemasrecetasbd_v.Controller;
 
+import com.google.gson.Gson;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.stage.Stage;
@@ -7,7 +8,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableView;
-import org.example.sistemasrecetasbd_v.Logica.FarmaceutaLogica;
+import org.example.sistemasrecetasbd_v.Data.GsonProvider;
+import org.example.sistemasrecetasbd_v.Servicios.UserSocketService;
 import org.example.sistemasrecetasbd_v.Model.Clases.Farmaceuta;
 
 public class AgregarFarmaceutasController {
@@ -15,9 +17,10 @@ public class AgregarFarmaceutasController {
     @FXML private Button btnRegistrarFarmaceuta, btnVolverFarmaceuta;
     @FXML private ProgressIndicator progFarmaceuta;
 
-    private final FarmaceutaLogica farmaceutaLogica = new FarmaceutaLogica();
+    private final Gson gson = GsonProvider.get();
     private Farmaceuta farmaceuta;
     private boolean modoEdicion = false;
+
 
     private TableView<Farmaceuta> tablaDestino;
     public void setTablaDestino(TableView<Farmaceuta> t) {
@@ -77,48 +80,56 @@ public class AgregarFarmaceutasController {
         alert.showAndWait();
     }
 
-
     private void guardarFarmaceutaAsync(Farmaceuta f, TableView<Farmaceuta> tablaFarmaceuta) {
         btnRegistrarFarmaceuta.setDisable(true);
         btnVolverFarmaceuta.setDisable(true);
+        progFarmaceuta.setVisible(true);
 
         Async.run(
                 () -> {
                     try {
-                        if (modoEdicion) {
-                            farmaceutaLogica.update(f);
-                            return f;
-                        } else {
-                            int nuevoId = farmaceutaLogica.insert(f).getId();
-                            f.setId(nuevoId);
-                            return f;
-                        }
+                        UserSocketService servicio = new UserSocketService();
+                        String json = """
+                    {
+                      "tipo": "farmaceuta",
+                      "op": "%s",
+                      "data": %s
+                    }
+                    """.formatted(modoEdicion ? "update" : "create", gson.toJson(f));
+
+                        String respuesta = servicio.enviar(json);
+                        Farmaceuta guardado = gson.fromJson(respuesta, Farmaceuta.class);
+
+                        if (!modoEdicion && guardado != null)
+                            f.setId(guardado.getId());
+
+                        return f;
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
                 },
                 guardado -> {
+                    progFarmaceuta.setVisible(false);
                     btnRegistrarFarmaceuta.setDisable(false);
                     btnVolverFarmaceuta.setDisable(false);
-                    progFarmaceuta.setVisible(true);
 
                     if (tablaFarmaceuta != null) {
-                        if (modoEdicion) {
-                            tablaFarmaceuta.refresh();
-                        } else {
-                            tablaFarmaceuta.getItems().add(guardado);
-                        }
+                        if (modoEdicion) tablaFarmaceuta.refresh();
+                        else tablaFarmaceuta.getItems().add(guardado);
                     }
 
                     new Alert(Alert.AlertType.INFORMATION,
                             (modoEdicion ? "Farmaceuta actualizado (ID: " : "Farmaceuta guardado (ID: ")
                                     + guardado.getId() + ")").showAndWait();
+
                     ((Stage) txtNombreAgregarFarmaceuta.getScene().getWindow()).close();
                 },
                 ex -> {
+                    progFarmaceuta.setVisible(false);
                     btnRegistrarFarmaceuta.setDisable(false);
-                    new Alert(Alert.AlertType.ERROR, "No se pudo guardar: " + ex.getMessage()).showAndWait();
+                    new Alert(Alert.AlertType.ERROR, "No se pudo guardar el farmaceuta: " + ex.getMessage()).showAndWait();
                 }
         );
     }
+
 }
