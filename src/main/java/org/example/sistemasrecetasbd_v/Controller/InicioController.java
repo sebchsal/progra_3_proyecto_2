@@ -1,6 +1,7 @@
 package org.example.sistemasrecetasbd_v.Controller;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,8 +21,11 @@ import org.example.sistemasrecetasbd_v.Model.Listas.*;
 import org.example.sistemasrecetasbd_v.Servicios.UserSocketService;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -50,15 +54,12 @@ public class InicioController implements Initializable {
 
     // Tabla de Medicos...
     @FXML private TableView<Medico> tblListaMedicos;
-    @FXML private TableColumn<Medico, String> colIDMedicos, colIdentificacionMedicos,
-            colNombreMedicos, colEspecialidadMedicos;
+    @FXML private TableColumn<Medico, String> colIDMedicos, colIdentificacionMedicos, colNombreMedicos, colEspecialidadMedicos;
     @FXML private TextField txtBuscarMedicos;
     @FXML private Button btnEliminarMedicos;
     // Datos de Medicos
     private ListaMedicos listaMedicos;
     private final ObservableList<Medico> observableMedicos = FXCollections.observableArrayList();
-    // Datos para tabla de Medicos en BD
-    private final MedicoLogica medicoLogica = new MedicoLogica();
 
     // Tabla de Farmaceutas
     @FXML private TableView<Farmaceuta> tblListaFarmaceutas;
@@ -68,20 +69,15 @@ public class InicioController implements Initializable {
     // Datos de Farmaceutas...
     private ListaFarmaceutas listaFarmaceutas;
     private ObservableList<Farmaceuta> observableFarmaceutas = FXCollections.observableArrayList();
-    // Datos para tabla de Farmaceutas en BD
-    private final FarmaceutaLogica farmaceutaLogica = new FarmaceutaLogica();
 
     // Tabla de pacientes
     @FXML private TableView<Paciente> tblListaPacientes;
-    @FXML private TableColumn<Paciente, String> colIdentificacionPaciente, colIDPacientes,
-            colNombrePacientes, colFechaNacimientoPacientes, colTelefonoPaciente;
+    @FXML private TableColumn<Paciente, String> colIdentificacionPaciente, colIDPacientes, colNombrePacientes, colFechaNacimientoPacientes, colTelefonoPaciente;
     @FXML private TextField txtBuscarPacientes;
     @FXML private Button btnEliminarPacientes;
     // Datos de pacientes
     private ListaPacientes listaPacientes;
     private final ObservableList<Paciente> observablePacientes = FXCollections.observableArrayList();
-    // Datos para tabla de Pacientes en BD
-    private final PacienteLogica pacienteLogica = new PacienteLogica();
 
     // Table de Medicamentos
     @FXML private TableView<Medicamento> tblListaMedicamentos;
@@ -90,15 +86,12 @@ public class InicioController implements Initializable {
     @FXML private Button btnEliminarMedicamentos;
     private CatalogoMedicamentos catalogoMedicamentos;
     private final ObservableList<Medicamento> observableMedicamentos = FXCollections.observableArrayList();
-    // Datos para tabla de Medicamento en BD
-    private final MedicamentoLogica medicamentoLogica = new MedicamentoLogica();
 
     // Table de Recetas
     private HistoricoRecetas historicoRecetas;
     private final ObservableList<Receta> observableHistoricoRecetas = FXCollections.observableArrayList();
     @FXML private TableView<Receta> tblListaHistorial;
-    @FXML private TableColumn<Receta, String> colCodigoHistorial, colMedicamentoHistorial,
-            colPacienteHistorial, colEstadoHistorial, colcantHistorial;
+    @FXML private TableColumn<Receta, String> colCodigoHistorial, colMedicamentoHistorial, colPacienteHistorial, colEstadoHistorial, colcantHistorial;
     // Datos para tabla de Receta en BD
     private final RecetaLogica recetaLogica = new RecetaLogica();
 
@@ -179,12 +172,10 @@ public class InicioController implements Initializable {
     private void setupPermissions() {
         boolean isMedico = "medico".equals(userType);
         boolean isFarmaceuta = "farmacéuta".equals(userType);
-
         // se desabilita el boton preescripcion si no es medico
         btnPrescripcion.setDisable(!isMedico);
         // se desabilita el boton despacho si no es farmaceutico
         btnDespacho.setDisable(!isFarmaceuta);
-
         // Actualiza el estilo de los botones
         updateButtonStyles();
     }
@@ -209,6 +200,7 @@ public class InicioController implements Initializable {
         }
     }
 
+    // actualiza el label del usuario que se encuentra loggeado al sistema
     private void updateUserDisplay() {
         if (lblusuarioactual != null && currentUser != null) {
             String userName = "";
@@ -225,7 +217,6 @@ public class InicioController implements Initializable {
                 case "farmacéuta" -> "Farmacéuta";
                 default -> "";
             };
-
             lblusuarioactual.setText(userName + " (" + userRole + ")");
         }
     }
@@ -567,7 +558,6 @@ public class InicioController implements Initializable {
             eliminarMedicamentoAsync(seleccionado, tblListaMedicamentos);
         }
     }
-
     // boton buscar
     @FXML private void buscarMedicamento() {
         String criterio = txtBuscarMedicamentos.getText().trim().toLowerCase();
@@ -575,7 +565,6 @@ public class InicioController implements Initializable {
             tblListaMedicamentos.setItems(observableMedicamentos);
             return;
         }
-
         tblListaMedicamentos.setItems(FXCollections.observableArrayList(
                 catalogoMedicamentos.getItems().stream().filter(m -> m.getNombre().toLowerCase().contains(criterio) ||
                         m.getCodigo().toLowerCase().contains(criterio)).collect(Collectors.toList())
@@ -587,17 +576,14 @@ public class InicioController implements Initializable {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemasrecetasbd_v/AgregarMedicamento.fxml"));
             Parent root = loader.load();
-
             AgregarMedicamentoController ctrl = loader.getController();
             ctrl.setMedicamento(medicamento, editar);
             ctrl.setTablaDestino(tblListaMedicamentos);
-
             Stage stage = new Stage();
             stage.setTitle(editar ? "Modificar Medicamento" : "Agregar Maciente");
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
-
             return (Medicamento) stage.getUserData();
         } catch (IOException e) {
             mostrarAlerta("Error al abrir formulario", e.getMessage());
@@ -610,10 +596,8 @@ public class InicioController implements Initializable {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemasrecetasbd_v/Prescripcion.fxml"));
             Parent root = loader.load();
-
             PrescripcionController ctrl = loader.getController();
             ctrl.setListas(listaPacientes, catalogoMedicamentos, historicoRecetas);
-
             Stage stage = new Stage();
             stage.setTitle("Prescripción");
             stage.setScene(new Scene(root));
@@ -657,16 +641,13 @@ public class InicioController implements Initializable {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemasrecetasbd_v/DetalleReceta.fxml"));
             Parent root = loader.load();
-
             DetalleController controller = loader.getController();
             controller.setReceta(seleccionada);
-
             Stage stage = new Stage();
             stage.setTitle("Detalles de Receta");
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
-
         } catch (IOException e) {
             mostrarAlerta("Error al abrir detalles", e.getMessage());
         }
@@ -677,18 +658,15 @@ public class InicioController implements Initializable {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemasrecetasbd_v/Estadisticas.fxml"));
             Parent root = loader.load();
-
             // Obtener el controlador y pasarle los datos necesarios
-            org.example.sistemasrecetasbd_v.Controller.EstadisticasController controller = loader.getController();
+            EstadisticasController controller = loader.getController();
             controller.inicializar(tblListaHistorial, tblListaMedicamentos);
-
             // Crear la nueva ventana
             Stage stage = new Stage();
             stage.setTitle("Estadísticas de Recetas");
             stage.setScene(new Scene(root));
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
-
         } catch (IOException e) {
             mostrarAlerta("Error al abrir estadísticas", e.getMessage());
         }
@@ -713,104 +691,169 @@ public class InicioController implements Initializable {
     // carga por medio de Hilos
     public void cargarMedicosAsync(){
         progMedtab.setVisible(true);
-        Async.run(() -> {
-            try {
-                return medicoLogica.findAll();
-            }
-            catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }, lista -> {
-            listaMedicos.setAll(lista);
-            observableMedicos.setAll(listaMedicos.getItems());
-            progMedtab.setVisible(false);
-        }, ex -> {
-            progMedtab.setVisible(false);
-            mostrarAlerta("Error al cargar medicos", ex.getMessage());
-        });
+        Async.run(
+                () -> {
+                    try {
+                        UserSocketService servicio = new UserSocketService();
+                        String json = """
+                    {
+                        "tipo": "medico",
+                        "op": "findAll"
+                    }
+                    """;
+                        String respuesta = servicio.enviar(json);
+                        // Convertir la respuesta JSON a lista de Medicos
+                        Type listType = new TypeToken<List<Medico>>(){}.getType();
+                        return gson.fromJson(respuesta, listType);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                lista -> {
+                    listaMedicos.setAll((List<Medico>) lista);
+                    observableMedicos.setAll(listaMedicos.getItems());
+                    progMedtab.setVisible(false);
+                },
+                ex -> {
+                    progMedtab.setVisible(false);
+                    mostrarAlerta("Error al cargar médicos", ex.getMessage());
+                }
+        );
     }
 
     public void cargarFarmaceutasAsync(){
         progFarmtab.setVisible(true);
-        Async.run(() -> {
-            try {
-                return farmaceutaLogica.findAll();
-            }
-            catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }, lista -> {
-            listaFarmaceutas.setAll(lista);
-            observableFarmaceutas.setAll(listaFarmaceutas.getItems());
-            progFarmtab.setVisible(false);
-        }, ex -> {
-            progFarmtab.setVisible(false);
-            mostrarAlerta("Error al cargar farmaceutas", ex.getMessage());
-        });
+        Async.run(
+                () -> {
+                    try {
+                        UserSocketService servicio = new UserSocketService();
+
+                        String json = """
+                    {
+                        "tipo": "farmaceuta",
+                        "op": "findAll"
+                    }
+                    """;
+                        String respuesta = servicio.enviar(json);
+                        // Convertir la respuesta JSON a lista de Farmaceutas
+                        Type listType = new TypeToken<List<Farmaceuta>>(){}.getType();
+                        return gson.fromJson(respuesta, listType);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                lista -> {
+                    listaFarmaceutas.setAll((List<Farmaceuta>) lista);
+                    observableFarmaceutas.setAll(listaFarmaceutas.getItems());
+                    progFarmtab.setVisible(false);
+                },
+                ex -> {
+                    progFarmtab.setVisible(false);
+                    mostrarAlerta("Error al cargar farmacéuticos", ex.getMessage());
+                }
+        );
     }
 
     public void cargarPacienteAsync(){
         progPactab.setVisible(true);
-        Async.run(() -> {
-            try {
-                return pacienteLogica.findAll();
-            }
-            catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }, lista -> {
-            listaPacientes.setAll(lista);
-            observablePacientes.setAll(listaPacientes.getItems());
-            progPactab.setVisible(false);
-        }, ex -> {
-            progPactab.setVisible(false);
-            mostrarAlerta("Error al cargar pacientes", ex.getMessage());
-        });
+        Async.run(
+                () -> {
+                    try {
+                        UserSocketService servicio = new UserSocketService();
+                        String json = """
+                    {
+                        "tipo": "paciente",
+                        "op": "findAll"
+                    }
+                    """;
+                        String respuesta = servicio.enviar(json);
+                        // Convertir la respuesta JSON a lista de Pacientes
+                        Type listType = new TypeToken<List<Paciente>>(){}.getType();
+                        return gson.fromJson(respuesta, listType);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                lista -> {
+                    listaPacientes.setAll((List<Paciente>) lista);
+                    observablePacientes.setAll(listaPacientes.getItems());
+                    progPactab.setVisible(false);
+                },
+                ex -> {
+                    progPactab.setVisible(false);
+                    mostrarAlerta("Error al cargar pacientes", ex.getMessage());
+                }
+        );
     }
 
     public void cargarMedicamentoAsync(){
         progMedctab.setVisible(true);
-        Async.run(() -> {
-            try {
-                return medicamentoLogica.findAll();
-            }
-            catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }, lista -> {
-            catalogoMedicamentos.setAll(lista);
-            observableMedicamentos.setAll(catalogoMedicamentos.getItems());
-            progMedctab.setVisible(false);
-        }, ex -> {
-            progMedctab.setVisible(false);
-            mostrarAlerta("Error al cargar medicamentos", ex.getMessage());
-        });
+        Async.run(
+                () -> {
+                    try {
+                        UserSocketService servicio = new UserSocketService();
+                        String json = """
+                    {
+                        "tipo": "medicamento",
+                        "op": "findAll"
+                    }
+                    """;
+                        String respuesta = servicio.enviar(json);
+                        // Convertir la respuesta JSON a lista de Medicamentos
+                        Type listType = new TypeToken<List<Medicamento>>(){}.getType();
+                        return gson.fromJson(respuesta, listType);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                lista -> {
+                    catalogoMedicamentos.setAll((List<Medicamento>) lista);
+                    observableMedicamentos.setAll(catalogoMedicamentos.getItems());
+                    progMedctab.setVisible(false);
+                },
+                ex -> {
+                    progMedctab.setVisible(false);
+                    mostrarAlerta("Error al cargar medicamentos", ex.getMessage());
+                }
+        );
     }
 
     public void cargarRecetaAsync(){
         progRecetatab.setVisible(true);
-        Async.run(() -> {
-            try {
-                return recetaLogica.findAll();
-            }
-            catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }, lista -> {
-            historicoRecetas.setAll(lista);
-            observableHistoricoRecetas.setAll(historicoRecetas.getItems());
-            progRecetatab.setVisible(false);
-        }, ex -> {
-            progRecetatab.setVisible(false);
-            mostrarAlerta("Error al cargar recetas", ex.getMessage());
-        });
+        Async.run(
+                () -> {
+                    try {
+                        UserSocketService servicio = new UserSocketService();
+                        String json = """
+                    {
+                        "tipo": "receta",
+                        "op": "findAll"
+                    }
+                    """;
+                        String respuesta = servicio.enviar(json);
+                        // Convertir la respuesta JSON a lista de Recetas
+                        Type listType = new TypeToken<List<Receta>>(){}.getType();
+                        return gson.fromJson(respuesta, listType);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                lista -> {
+                    historicoRecetas.setAll((List<Receta>) lista);
+                    observableHistoricoRecetas.setAll(historicoRecetas.getItems());
+                    progRecetatab.setVisible(false);
+                },
+                ex -> {
+                    progRecetatab.setVisible(false);
+                    mostrarAlerta("Error al cargar recetas", ex.getMessage());
+                }
+        );
     }
 
     // metodos de eliminar por medio de Hilos
     private void eliminarMedicoAsync(Medico seleccionado, TableView<Medico> tabla) {
         btnEliminarMedicos.setDisable(true);
         progMedtab.setVisible(true);
-
         Async.run(
                 () -> {
                     try {
@@ -822,19 +865,15 @@ public class InicioController implements Initializable {
                         "id": %d
                     }
                     """.formatted(seleccionado.getId());
-
                         String respuesta = servicio.enviar(json);
-
                         // Parsear la respuesta para verificar si fue exitosa
-                        var respuestaObj = gson.fromJson(respuesta, java.util.Map.class);
+                        var respuestaObj = gson.fromJson(respuesta, Map.class);
                         Boolean ok = (Boolean) respuestaObj.get("ok");
-
                         if (ok != null && ok) {
                             return seleccionado.getId();
                         } else {
                             throw new RuntimeException("No se pudo eliminar el médico en el servidor");
                         }
-
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -842,7 +881,6 @@ public class InicioController implements Initializable {
                 idEliminado -> {
                     btnEliminarMedicos.setDisable(false);
                     progMedtab.setVisible(false);
-
                     listaMedicos.eliminarPorId(idEliminado);
                     observableMedicos.removeIf(m -> m.getId() == idEliminado);
                     if (tabla != null) tabla.refresh();
@@ -860,7 +898,6 @@ public class InicioController implements Initializable {
     private void eliminarFarmaceutaAsync(Farmaceuta seleccionado, TableView<Farmaceuta> tabla) {
         btnEliminarFarmaceutas.setDisable(true);
         progFarmtab.setVisible(true);
-
         Async.run(
                 () -> {
                     try {
@@ -872,13 +909,10 @@ public class InicioController implements Initializable {
                         "id": %d
                     }
                     """.formatted(seleccionado.getId());
-
                         String respuesta = servicio.enviar(json);
-
                         // Parsear la respuesta para verificar si fue exitosa
-                        var respuestaObj = gson.fromJson(respuesta, java.util.Map.class);
+                        var respuestaObj = gson.fromJson(respuesta, Map.class);
                         Boolean ok = (Boolean) respuestaObj.get("ok");
-
                         if (ok != null && ok) {
                             return seleccionado.getId();
                         } else {
@@ -892,7 +926,6 @@ public class InicioController implements Initializable {
                 idEliminado -> {
                     btnEliminarFarmaceutas.setDisable(false);
                     progFarmtab.setVisible(false);
-
                     listaFarmaceutas.eliminarPorId(idEliminado);
                     observableFarmaceutas.removeIf(f -> f.getId() == idEliminado);
                     if (tabla != null) tabla.refresh();
@@ -910,7 +943,6 @@ public class InicioController implements Initializable {
     private void eliminarPacienteAsync(Paciente seleccionado, TableView<Paciente> tabla) {
         btnEliminarPacientes.setDisable(true);
         progPactab.setVisible(true);
-
         Async.run(
                 () -> {
                     try {
@@ -922,13 +954,10 @@ public class InicioController implements Initializable {
                         "id": %d
                     }
                     """.formatted(seleccionado.getId());
-
                         String respuesta = servicio.enviar(json);
-
                         // Parsear la respuesta para verificar si fue exitosa
-                        var respuestaObj = gson.fromJson(respuesta, java.util.Map.class);
+                        var respuestaObj = gson.fromJson(respuesta, Map.class);
                         Boolean ok = (Boolean) respuestaObj.get("ok");
-
                         if (ok != null && ok) {
                             return seleccionado.getId();
                         } else {
@@ -942,7 +971,6 @@ public class InicioController implements Initializable {
                 idEliminado -> {
                     btnEliminarPacientes.setDisable(false);
                     progPactab.setVisible(false);
-
                     listaPacientes.eliminarPorId(idEliminado);
                     observablePacientes.removeIf(p -> p.getId() == idEliminado);
                     if (tabla != null) tabla.refresh();
@@ -960,7 +988,6 @@ public class InicioController implements Initializable {
     private void eliminarMedicamentoAsync(Medicamento seleccionado, TableView<Medicamento> tabla) {
         btnEliminarMedicamentos.setDisable(true);
         progMedctab.setVisible(true);
-
         Async.run(
                 () -> {
                     try {
@@ -972,19 +999,15 @@ public class InicioController implements Initializable {
                         "id": %d
                     }
                     """.formatted(seleccionado.getId());
-
                         String respuesta = servicio.enviar(json);
-
                         // Parsear la respuesta para verificar si fue exitosa
-                        var respuestaObj = gson.fromJson(respuesta, java.util.Map.class);
+                        var respuestaObj = gson.fromJson(respuesta, Map.class);
                         Boolean ok = (Boolean) respuestaObj.get("ok");
-
                         if (ok != null && ok) {
                             return seleccionado.getId();
                         } else {
                             throw new RuntimeException("No se pudo eliminar el medicamento en el servidor");
                         }
-
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -992,7 +1015,6 @@ public class InicioController implements Initializable {
                 idEliminado -> {
                     btnEliminarMedicamentos.setDisable(false);
                     progMedctab.setVisible(false);
-
                     catalogoMedicamentos.eliminarPorId(idEliminado);
                     observableMedicamentos.removeIf(md -> md.getId() == idEliminado);
                     if (tabla != null) tabla.refresh();
@@ -1010,9 +1032,8 @@ public class InicioController implements Initializable {
     // metodo para boton abrir Chat
     @FXML private void abrirChat() {
         try {
-            var loader = new javafx.fxml.FXMLLoader(getClass().getResource("/org/example/sistemasrecetasbd_v/ChatHospital.fxml"));
+            var loader = new FXMLLoader(getClass().getResource("/org/example/sistemasrecetasbd_v/ChatHospital.fxml"));
             Parent root = loader.load(); // <-- TIPADO EXPLÍCITO
-
             Stage stage = new Stage();
             stage.setTitle("HotelGUI Chat");
             stage.setScene(new Scene(root));
