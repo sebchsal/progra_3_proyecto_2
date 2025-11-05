@@ -47,7 +47,6 @@ public class PrescripcionController {
     private ListaPacientes listaPacientes;
     private CatalogoMedicamentos catalogoMedicamentos;
     private HistoricoRecetas historicoRecetas;
-    private final RecetaLogica recetaLogica = new RecetaLogica();
     // Wrappers observables para las tablas
     private final ObservableList<Paciente> observablePacientes = FXCollections.observableArrayList();
     private final ObservableList<Medicamento> observableMedicamentos = FXCollections.observableArrayList();
@@ -58,7 +57,7 @@ public class PrescripcionController {
     private static final DateTimeFormatter FECHA_FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     // se llama desde InicioController al abrir la ventana
-    public void setListas(ListaPacientes lp, CatalogoMedicamentos cm, HistoricoRecetas hr, RecetaLogica rl) {
+    public void setListas(ListaPacientes lp, CatalogoMedicamentos cm, HistoricoRecetas hr) {
         this.listaPacientes = lp;
         this.catalogoMedicamentos = cm;
         this.historicoRecetas = hr;

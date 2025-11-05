@@ -30,7 +30,7 @@ public class ServidorGeneral {
             }
         }
     }
-
+    // Manejar principal
     private void manejar(Socket socket) {
         try (DataInputStream in = new DataInputStream(socket.getInputStream());
              DataOutputStream out = new DataOutputStream(socket.getOutputStream())) {
@@ -74,7 +74,8 @@ public class ServidorGeneral {
         };
     }
 
-    // ---------- MÉDICO ----------
+    // Metodos de manejos en servidor por objeto
+    // Medico
     private String manejarMedico(Peticion p) throws Exception {
         return switch (p.op) {
             case "create" -> gson.toJson(medicoLogica.insert(gson.fromJson(p.data, Medico.class)));
@@ -88,7 +89,6 @@ public class ServidorGeneral {
             default -> "{\"error\":\"Operación no válida\"}";
         };
     }
-
     // Farmaceuta
     private String manejarFarmaceuta(Peticion p) throws Exception {
         return switch (p.op) {
@@ -103,7 +103,6 @@ public class ServidorGeneral {
             default -> "{\"error\":\"Operación no válida\"}";
         };
     }
-
     // Paciente
     private String manejarPaciente(Peticion p) throws Exception {
         return switch (p.op) {
@@ -118,8 +117,7 @@ public class ServidorGeneral {
             default -> "{\"error\":\"Operación no válida\"}";
         };
     }
-
-    // ---------- MEDICAMENTO ----------
+    // Medicamento
     private String manejarMedicamento(Peticion p) throws Exception {
         return switch (p.op) {
             case "create" -> gson.toJson(medicamentoLogica.insert(gson.fromJson(p.data, Medicamento.class)));
@@ -134,7 +132,7 @@ public class ServidorGeneral {
         };
     }
 
-    // ---------- RECETA ----------
+    // Receta
     private String manejarReceta(Peticion p) throws Exception {
         return switch (p.op) {
             case "create" -> gson.toJson(recetaLogica.insert(gson.fromJson(p.data, Receta.class)));
@@ -149,7 +147,7 @@ public class ServidorGeneral {
         };
     }
 
-    // ---------- Clase auxiliar ----------
+    // Clase auxiliar
     public static class Peticion {
         public String tipo; // medico, farmaceuta, medicamento, receta
         public String op;   // create, update, delete, findAll, findById

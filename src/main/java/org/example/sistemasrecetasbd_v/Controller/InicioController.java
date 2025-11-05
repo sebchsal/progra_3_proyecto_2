@@ -1,5 +1,6 @@
 package org.example.sistemasrecetasbd_v.Controller;
 
+import com.google.gson.Gson;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -12,13 +13,16 @@ import javafx.scene.control.*;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import org.example.sistemasrecetasbd_v.Data.GsonProvider;
 import org.example.sistemasrecetasbd_v.Logica.*;
 import org.example.sistemasrecetasbd_v.Model.Clases.*;
 import org.example.sistemasrecetasbd_v.Model.Listas.*;
+import org.example.sistemasrecetasbd_v.Servicios.UserSocketService;
 
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,9 +30,12 @@ import java.util.stream.Collectors;
 import java.time.format.DateTimeFormatter;
 
 public class InicioController implements Initializable {
-    // boton de cerrarsesion y label que indica el usuario...
-    @FXML private Button btncerrarsesion;
-    @FXML private Label lblusuarioactual;
+    // variable para la respuesta por parte del json del service
+    private final Gson gson = GsonProvider.get();
+
+    // botones y labelis
+    @FXML private Button btncerrarsesion, btnPrescripcion, btnDespacho;
+    @FXML private Label lblusuarioactual; //indica el usuario que ingreso al sistema
 
     // progressindicators
     @FXML private ProgressIndicator progMedtab;
@@ -46,6 +53,7 @@ public class InicioController implements Initializable {
     @FXML private TableColumn<Medico, String> colIDMedicos, colIdentificacionMedicos,
             colNombreMedicos, colEspecialidadMedicos;
     @FXML private TextField txtBuscarMedicos;
+    @FXML private Button btnEliminarMedicos;
     // Datos de Medicos
     private ListaMedicos listaMedicos;
     private final ObservableList<Medico> observableMedicos = FXCollections.observableArrayList();
@@ -56,6 +64,7 @@ public class InicioController implements Initializable {
     @FXML private TableView<Farmaceuta> tblListaFarmaceutas;
     @FXML private TableColumn<Farmaceuta, String> colIDFarmaceutas, colIdentificacionFarmaceutas, colNombreFarmaceutas;
     @FXML private TextField txtBuscarFarmaceutas;
+    @FXML private Button btnEliminarFarmaceutas;
     // Datos de Farmaceutas...
     private ListaFarmaceutas listaFarmaceutas;
     private ObservableList<Farmaceuta> observableFarmaceutas = FXCollections.observableArrayList();
@@ -67,6 +76,7 @@ public class InicioController implements Initializable {
     @FXML private TableColumn<Paciente, String> colIdentificacionPaciente, colIDPacientes,
             colNombrePacientes, colFechaNacimientoPacientes, colTelefonoPaciente;
     @FXML private TextField txtBuscarPacientes;
+    @FXML private Button btnEliminarPacientes;
     // Datos de pacientes
     private ListaPacientes listaPacientes;
     private final ObservableList<Paciente> observablePacientes = FXCollections.observableArrayList();
@@ -77,7 +87,7 @@ public class InicioController implements Initializable {
     @FXML private TableView<Medicamento> tblListaMedicamentos;
     @FXML private TableColumn<Medicamento, String> colCodigoMedicamentos, colNombreMedicamentos, colPresentacionMedicamentos;
     @FXML private TextField txtBuscarMedicamentos;
-    @FXML private Button btnPrescripcion, btnDespacho, btnEstadisticas;
+    @FXML private Button btnEliminarMedicamentos;
     private CatalogoMedicamentos catalogoMedicamentos;
     private final ObservableList<Medicamento> observableMedicamentos = FXCollections.observableArrayList();
     // Datos para tabla de Medicamento en BD
@@ -266,20 +276,22 @@ public class InicioController implements Initializable {
             mostrarAlerta("Permiso denegado", "Solo los administradores pueden eliminar médicos.");
             return;
         }
+
         Medico seleccionado = tblListaMedicos.getSelectionModel().getSelectedItem();
         if (seleccionado == null) {
             mostrarAlerta("Seleccione un médico", "Seleccione un médico para eliminar.");
             return;
         }
+        // Mostrar confirmación antes de eliminar
+        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmacion.setTitle("Confirmar eliminación");
+        confirmacion.setHeaderText("¿Está seguro de que desea eliminar al médico?");
+        confirmacion.setContentText("Médico: " + seleccionado.getNombre());
 
-        try {
-            boolean ok = medicoLogica.delete(seleccionado.getId());
-            if (ok) {
-                listaMedicos.eliminarPorId(seleccionado.getId());
-                observableMedicos.remove(seleccionado);
-            }
-        } catch (Exception e) {
-            mostrarAlerta("Error al eliminar", e.getMessage());
+        Optional<ButtonType> resultado = confirmacion.showAndWait();
+        if (resultado.isPresent() && resultado.get() == ButtonType.OK) {
+            // Llamar al metodo asíncrono para eliminar
+            eliminarMedicoAsync(seleccionado, tblListaMedicos);
         }
     }
 
@@ -303,7 +315,7 @@ public class InicioController implements Initializable {
         }
     }
 
-    // mostrar el formulario de agregarMedico.fxml para los botones agregar y modificar en tab medicos
+    // mostrar el formulario de agregarMedico para los botones agregar y modificar en tab medicos
     private Medico mostrarFormularioMedico(Medico medico, boolean editar) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/org/example/sistemasrecetasbd_v/AgregarMedicos.fxml"));
@@ -361,21 +373,22 @@ public class InicioController implements Initializable {
             mostrarAlerta("Permiso denegado", "Solo los administradores pueden eliminar farmaceutas.");
             return;
         }
-        try {
-            Farmaceuta seleccionado = tblListaFarmaceutas.getSelectionModel().getSelectedItem();
-            if (seleccionado == null) {
-                mostrarAlerta("Seleccione un farmaceuta", "Seleccione un farmaceuta de la tabla para eliminar.");
-                return;
-            }
-            boolean eliminado = farmaceutaLogica.delete(seleccionado.getId());
-            if (!eliminado) {
-                mostrarAlerta("Error", "No se pudo eliminar el farmaceuta de la base de datos.");
-                return;
-            }
-            listaFarmaceutas.eliminarPorId(seleccionado.getId());
-            tblListaFarmaceutas.getItems().remove(seleccionado);
-        } catch (Exception e) {
-            mostrarAlerta("Error al eliminar farmaceuta", e.getMessage());
+
+        Farmaceuta seleccionado = tblListaFarmaceutas.getSelectionModel().getSelectedItem();
+        if (seleccionado == null) {
+            mostrarAlerta("Seleccione un farmaceuta", "Seleccione un farmaceuta para eliminar.");
+            return;
+        }
+        // Mostrar confirmación antes de eliminar
+        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmacion.setTitle("Confirmar eliminación");
+        confirmacion.setHeaderText("¿Está seguro de que desea eliminar al farmaceuta?");
+        confirmacion.setContentText("farmaceuta: " + seleccionado.getNombre());
+
+        Optional<ButtonType> resultado = confirmacion.showAndWait();
+        if (resultado.isPresent() && resultado.get() == ButtonType.OK) {
+            // Llamar al metodo asíncrono para eliminar
+            eliminarFarmaceutaAsync(seleccionado, tblListaFarmaceutas);
         }
     }
 
@@ -451,23 +464,22 @@ public class InicioController implements Initializable {
             mostrarAlerta("Permiso denegado", "Solo los administradores pueden eliminar pacientes.");
             return;
         }
-        try {
-            Paciente seleccionado = tblListaPacientes.getSelectionModel().getSelectedItem();
-            if (seleccionado == null) {
-                mostrarAlerta("Seleccione un paciente", "Seleccione un paciente de la tabla para eliminar.");
-                return;
-            }
 
-            boolean eliminado = pacienteLogica.delete(seleccionado.getId());
-            if (!eliminado) {
-                mostrarAlerta("Error", "No se pudo eliminar el paciente de la base de datos.");
-                return;
-            }
+        Paciente seleccionado = tblListaPacientes.getSelectionModel().getSelectedItem();
+        if (seleccionado == null) {
+            mostrarAlerta("Seleccione un paciente", "Seleccione un paciente para eliminar.");
+            return;
+        }
+        // Mostrar confirmación antes de eliminar
+        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmacion.setTitle("Confirmar eliminación");
+        confirmacion.setHeaderText("¿Está seguro de que desea eliminar al paciente?");
+        confirmacion.setContentText("paciente: " + seleccionado.getNombre());
 
-            listaPacientes.eliminarPorId(seleccionado.getId());
-            tblListaPacientes.getItems().remove(seleccionado);
-        } catch (Exception e) {
-            mostrarAlerta("Error al eliminar paciente", e.getMessage());
+        Optional<ButtonType> resultado = confirmacion.showAndWait();
+        if (resultado.isPresent() && resultado.get() == ButtonType.OK) {
+            // Llamar al metodo asíncrono para eliminar
+            eliminarPacienteAsync(seleccionado, tblListaPacientes);
         }
     }
 
@@ -538,27 +550,21 @@ public class InicioController implements Initializable {
 
     // boton eliminar
     @FXML private void eliminarMedicamento() {
-        if (!"medico".equals(userType)) {
-            mostrarAlerta("Permiso denegado", "Solo los medicos pueden eliminar pacientes.");
+        Medicamento seleccionado = tblListaMedicamentos.getSelectionModel().getSelectedItem();
+        if (seleccionado == null) {
+            mostrarAlerta("Seleccione un medicamento", "Seleccione un medicamento para eliminar.");
             return;
         }
-        try {
-            Medicamento seleccionado = tblListaMedicamentos.getSelectionModel().getSelectedItem();
-            if (seleccionado == null) {
-                mostrarAlerta("Seleccione un medicamento", "Seleccione un medicamento de la tabla para eliminar.");
-                return;
-            }
+        // Mostrar confirmación antes de eliminar
+        Alert confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmacion.setTitle("Confirmar eliminación");
+        confirmacion.setHeaderText("¿Está seguro de que desea eliminar el medicamento?");
+        confirmacion.setContentText("medicamento: " + seleccionado.getNombre() + "codigo: " + seleccionado.getCodigo());
 
-            boolean eliminado = medicamentoLogica.delete(seleccionado.getId());
-            if (!eliminado) {
-                mostrarAlerta("Error", "No se pudo eliminar el medicamento de la base de datos.");
-                return;
-            }
-
-            catalogoMedicamentos.eliminarPorId(seleccionado.getId());
-            tblListaMedicamentos.getItems().remove(seleccionado);
-        } catch (Exception e) {
-            mostrarAlerta("Error al eliminar medicamento", e.getMessage());
+        Optional<ButtonType> resultado = confirmacion.showAndWait();
+        if (resultado.isPresent() && resultado.get() == ButtonType.OK) {
+            // Llamar al metodo asíncrono para eliminar
+            eliminarMedicamentoAsync(seleccionado, tblListaMedicamentos);
         }
     }
 
@@ -606,7 +612,7 @@ public class InicioController implements Initializable {
             Parent root = loader.load();
 
             PrescripcionController ctrl = loader.getController();
-            ctrl.setListas(listaPacientes, catalogoMedicamentos, historicoRecetas, recetaLogica);
+            ctrl.setListas(listaPacientes, catalogoMedicamentos, historicoRecetas);
 
             Stage stage = new Stage();
             stage.setTitle("Prescripción");
@@ -704,6 +710,7 @@ public class InicioController implements Initializable {
         }
     }
 
+    // carga por medio de Hilos
     public void cargarMedicosAsync(){
         progMedtab.setVisible(true);
         Async.run(() -> {
@@ -799,6 +806,208 @@ public class InicioController implements Initializable {
         });
     }
 
+    // metodos de eliminar por medio de Hilos
+    private void eliminarMedicoAsync(Medico seleccionado, TableView<Medico> tabla) {
+        btnEliminarMedicos.setDisable(true);
+        progMedtab.setVisible(true);
+
+        Async.run(
+                () -> {
+                    try {
+                        UserSocketService servicio = new UserSocketService();
+                        String json = """
+                    {
+                        "tipo": "medico",
+                        "op": "delete",
+                        "id": %d
+                    }
+                    """.formatted(seleccionado.getId());
+
+                        String respuesta = servicio.enviar(json);
+
+                        // Parsear la respuesta para verificar si fue exitosa
+                        var respuestaObj = gson.fromJson(respuesta, java.util.Map.class);
+                        Boolean ok = (Boolean) respuestaObj.get("ok");
+
+                        if (ok != null && ok) {
+                            return seleccionado.getId();
+                        } else {
+                            throw new RuntimeException("No se pudo eliminar el médico en el servidor");
+                        }
+
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                idEliminado -> {
+                    btnEliminarMedicos.setDisable(false);
+                    progMedtab.setVisible(false);
+
+                    listaMedicos.eliminarPorId(idEliminado);
+                    observableMedicos.removeIf(m -> m.getId() == idEliminado);
+                    if (tabla != null) tabla.refresh();
+
+                    mostrarAlerta("Éxito", "El médico ha sido eliminado correctamente.");
+                },
+                ex -> {
+                    btnEliminarMedicos.setDisable(false);
+                    progMedtab.setVisible(false);
+                    mostrarAlerta("Error al eliminar", ex.getMessage());
+                }
+        );
+    }
+
+    private void eliminarFarmaceutaAsync(Farmaceuta seleccionado, TableView<Farmaceuta> tabla) {
+        btnEliminarFarmaceutas.setDisable(true);
+        progFarmtab.setVisible(true);
+
+        Async.run(
+                () -> {
+                    try {
+                        UserSocketService servicio = new UserSocketService();
+                        String json = """
+                    {
+                        "tipo": "farmaceuta",
+                        "op": "delete",
+                        "id": %d
+                    }
+                    """.formatted(seleccionado.getId());
+
+                        String respuesta = servicio.enviar(json);
+
+                        // Parsear la respuesta para verificar si fue exitosa
+                        var respuestaObj = gson.fromJson(respuesta, java.util.Map.class);
+                        Boolean ok = (Boolean) respuestaObj.get("ok");
+
+                        if (ok != null && ok) {
+                            return seleccionado.getId();
+                        } else {
+                            throw new RuntimeException("No se pudo eliminar el farmaceuta en el servidor");
+                        }
+
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                idEliminado -> {
+                    btnEliminarFarmaceutas.setDisable(false);
+                    progFarmtab.setVisible(false);
+
+                    listaFarmaceutas.eliminarPorId(idEliminado);
+                    observableFarmaceutas.removeIf(f -> f.getId() == idEliminado);
+                    if (tabla != null) tabla.refresh();
+
+                    mostrarAlerta("Éxito", "El farmaceuta ha sido eliminado correctamente.");
+                },
+                ex -> {
+                    btnEliminarMedicos.setDisable(false);
+                    progMedtab.setVisible(false);
+                    mostrarAlerta("Error al eliminar", ex.getMessage());
+                }
+        );
+    }
+
+    private void eliminarPacienteAsync(Paciente seleccionado, TableView<Paciente> tabla) {
+        btnEliminarPacientes.setDisable(true);
+        progPactab.setVisible(true);
+
+        Async.run(
+                () -> {
+                    try {
+                        UserSocketService servicio = new UserSocketService();
+                        String json = """
+                    {
+                        "tipo": "paciente",
+                        "op": "delete",
+                        "id": %d
+                    }
+                    """.formatted(seleccionado.getId());
+
+                        String respuesta = servicio.enviar(json);
+
+                        // Parsear la respuesta para verificar si fue exitosa
+                        var respuestaObj = gson.fromJson(respuesta, java.util.Map.class);
+                        Boolean ok = (Boolean) respuestaObj.get("ok");
+
+                        if (ok != null && ok) {
+                            return seleccionado.getId();
+                        } else {
+                            throw new RuntimeException("No se pudo eliminar el paciente en el servidor");
+                        }
+
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                idEliminado -> {
+                    btnEliminarPacientes.setDisable(false);
+                    progPactab.setVisible(false);
+
+                    listaPacientes.eliminarPorId(idEliminado);
+                    observablePacientes.removeIf(p -> p.getId() == idEliminado);
+                    if (tabla != null) tabla.refresh();
+
+                    mostrarAlerta("Éxito", "El paciente ha sido eliminado correctamente.");
+                },
+                ex -> {
+                    btnEliminarMedicos.setDisable(false);
+                    progMedtab.setVisible(false);
+                    mostrarAlerta("Error al eliminar", ex.getMessage());
+                }
+        );
+    }
+
+    private void eliminarMedicamentoAsync(Medicamento seleccionado, TableView<Medicamento> tabla) {
+        btnEliminarMedicamentos.setDisable(true);
+        progMedctab.setVisible(true);
+
+        Async.run(
+                () -> {
+                    try {
+                        UserSocketService servicio = new UserSocketService();
+                        String json = """
+                    {
+                        "tipo": "medicamento",
+                        "op": "delete",
+                        "id": %d
+                    }
+                    """.formatted(seleccionado.getId());
+
+                        String respuesta = servicio.enviar(json);
+
+                        // Parsear la respuesta para verificar si fue exitosa
+                        var respuestaObj = gson.fromJson(respuesta, java.util.Map.class);
+                        Boolean ok = (Boolean) respuestaObj.get("ok");
+
+                        if (ok != null && ok) {
+                            return seleccionado.getId();
+                        } else {
+                            throw new RuntimeException("No se pudo eliminar el medicamento en el servidor");
+                        }
+
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                },
+                idEliminado -> {
+                    btnEliminarMedicamentos.setDisable(false);
+                    progMedctab.setVisible(false);
+
+                    catalogoMedicamentos.eliminarPorId(idEliminado);
+                    observableMedicamentos.removeIf(md -> md.getId() == idEliminado);
+                    if (tabla != null) tabla.refresh();
+
+                    mostrarAlerta("Éxito", "El medicamento ha sido eliminado correctamente.");
+                },
+                ex -> {
+                    btnEliminarMedicamentos.setDisable(false);
+                    progMedctab.setVisible(false);
+                    mostrarAlerta("Error al eliminar", ex.getMessage());
+                }
+        );
+    }
+
+    // metodo para boton abrir Chat
     @FXML private void abrirChat() {
         try {
             var loader = new javafx.fxml.FXMLLoader(getClass().getResource("/org/example/sistemasrecetasbd_v/ChatHospital.fxml"));
@@ -810,7 +1019,6 @@ public class InicioController implements Initializable {
             stage.show();
         } catch (Exception e) {
             e.printStackTrace();
-            // new Alert(Alert.AlertType.ERROR, "No se pudo abrir el chat:\n" + e.getMessage()).showAndWait();
         }
     }
 
