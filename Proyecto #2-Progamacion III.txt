@@ -1,0 +1,11 @@
+Proyecto #2-Progamacion III
+Integrantes:
+Sebastián Chaves Salazar
+Julian Ramos Arias
+
+Instrucción de funcionamiento
+Para entrar el sistema de declaro un administrados en Login Controller como dato fijo para el acceso al sistema, el usuario para entrar como admin es "admin" y la clave "1234"
+
+En la carpeta sql esta el script para crear la base de datos junto con las tablas de cada objeto
+
+Recordar cambiar los .properties con el user y el password de la conexión del sql
