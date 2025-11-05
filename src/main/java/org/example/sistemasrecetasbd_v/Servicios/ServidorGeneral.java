@@ -89,7 +89,7 @@ public class ServidorGeneral {
         };
     }
 
-    // ---------- FARMACEUTA ----------
+    // Farmaceuta
     private String manejarFarmaceuta(Peticion p) throws Exception {
         return switch (p.op) {
             case "create" -> gson.toJson(farmaceutaLogica.insert(gson.fromJson(p.data, Farmaceuta.class)));
@@ -104,7 +104,7 @@ public class ServidorGeneral {
         };
     }
 
-    // ---------- PACIENTE ----------
+    // Paciente
     private String manejarPaciente(Peticion p) throws Exception {
         return switch (p.op) {
             case "create" -> gson.toJson(pacienteLogica.insert(gson.fromJson(p.data, Paciente.class)));

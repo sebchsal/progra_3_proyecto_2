@@ -13,6 +13,9 @@ module org.example.sistemasrecetasbd_v {
     exports org.example.sistemasrecetasbd_v.Principal;
     opens org.example.sistemasrecetasbd_v.Principal to javafx.fxml;
 
+    exports org.example.sistemasrecetasbd_v.Model.Clases;
+    opens  org.example.sistemasrecetasbd_v.Model.Clases to javafx.fxml, com.google.gson;
+
     exports org.example.sistemasrecetasbd_v.Data;
 
     opens org.example.sistemasrecetasbd_v.Servicios to com.google.gson;
